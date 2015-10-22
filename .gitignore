@@ -43,3 +43,8 @@ Thumbs.db
 # use `npm install`
 node_modules/
 
+# Project Specific #
+######################
+# temp files in /app/queue
+app/queue/
+

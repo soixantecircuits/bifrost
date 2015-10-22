@@ -1,13 +1,107 @@
 // Require
-var pjson = require('./package.json');
-var bodyParser = require('body-parser');
+var 
+	pjson = require('./package.json'),
+	config = require('./app/config/config.json'),
+	
+	ip = require('ip'),
+	fs = require('fs'),
+	request = require('request'),
+	bodyParser = require('body-parser'),
+	express = require('express');
 
-var express = require('express');
+// Variables
+var 
+	pathQueue = "./app/queue",
+	expressResponse,
+	retryTimeout;
+
+// Proxy
+var proxyPost = function( postData, fromQueue ) {
+
+	var 
+		url = config.proxy.url,
+		date = new Date(),
+		timestamp = date.getTime();
+
+	if ( !postData.timestamp ) postData.timestamp = timestamp;
+
+	// TEMPORARY // Add Randomness to make the request fail sometimes
+	var port = ':'+((Math.random() > 0.5) ? 80 : 81);
+	if ( !fromQueue ) url += port;
+	// TEMPORARY //
+	
+	request.post( url, {form : postData}, function ( error, response, body ) {
+
+		if (!error && response.statusCode == 200) {
+
+			console.log( "data posted", postData );
+
+			if ( fromQueue ) {
+				fs.unlink( pathQueue + '/' + postData.timestamp + '.txt', function(err) {
+					if (err) throw err;
+				});
+			}
+			else expressResponse.send( body );
+
+		} else {
+			onProxyError( postData, fromQueue );
+		}
+	});
+};
+
+var onProxyError = function( postData, fromQueue ) {
+
+	if ( fromQueue ) {
+
+		if ( retryTimeout ) clearTimeout( retryTimeout );
+		retryTimeout = setTimeout( handleQueue, 5000 );
+
+	} else {
+
+		fs.writeFile( pathQueue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
+
+			if ( err ) throw err;
+
+			if ( retryTimeout ) clearTimeout( retryTimeout );
+			retryTimeout = setTimeout( handleQueue, 5000 );
+
+			expressResponse.send("Server is idle - data saved - automatic retry later");
+		});
+	}
+};
+
+var handleQueue = function() {
+
+	console.log("Handle Queue");
+
+	// TODO List files in queue
+	fs.readdir( pathQueue, function (err, files) {
+		if (err) throw err;
+
+		if ( files.length == 0 ) clearTimeout( retryTimeout );
+		readQueuedFiles(files);
+	});
+	// JSON.parse
+};
+
+var readQueuedFiles = function ( files ) {
+
+	files.forEach( function( file ) {
+
+		fs.readFile( pathQueue + '/' + file, function (err, data) {
+			if (err) throw err;
+			proxyPost( JSON.parse(data), true );
+		});
+	});
+};
+
+// INIT App
 var app = express();
 
 // Settings - bodyparser
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
 
 // Routes
 app.get('/', function ( req, res ) {
@@ -16,16 +110,15 @@ app.get('/', function ( req, res ) {
 
 app.post('/', function ( req, res ) {
 
-	res.end( JSON.stringify(req.body, null, 2) );
-
+	expressResponse = res;
+	proxyPost( req.body, false );
 });
 
 
 // Start server
 var server = app.listen(3000, function () {
-	var host = server.address().address;
+	
 	var port = server.address().port;
-
-	console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version, host, port);
+	console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version, ip.address(), port);
 });
 
