@@ -26,15 +26,16 @@ var proxyPost = function( postData, fromQueue ) {
 	if ( !postData.timestamp ) postData.timestamp = timestamp;
 
 	// TEMPORARY // Add Randomness to make the request fail sometimes
-	var port = ':'+((Math.random() > 0.5) ? 80 : 81);
-	if ( !fromQueue ) url += port;
+	if ( Math.random() > 0.8 ) {
+		url = 'http://bifrost-test.localhost:81';
+	}
 	// TEMPORARY //
 	
 	request.post( url, {form : postData}, function ( error, response, body ) {
 
 		if (!error && response.statusCode == 200) {
 
-			console.log( "data posted", postData );
+			// console.log( "data posted", postData );
 
 			if ( fromQueue ) {
 				fs.unlink( pathQueue + '/' + postData.timestamp + '.txt', function(err) {
@@ -72,12 +73,13 @@ var onProxyError = function( postData, fromQueue ) {
 
 var handleQueue = function() {
 
-	console.log("Handle Queue");
-
 	// TODO List files in queue
 	fs.readdir( pathQueue, function (err, files) {
 		if (err) throw err;
 
+		// console.log("Handle Queue", files, files.length);
+
+		files = files.filter( function(a){ return a.match(/\.txt$/); } );
 		if ( files.length == 0 ) clearTimeout( retryTimeout );
 		readQueuedFiles(files);
 	});
