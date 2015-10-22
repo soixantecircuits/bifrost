@@ -23,20 +23,38 @@ var proxyPost = function( postData, fromQueue ) {
 		date = new Date(),
 		timestamp = date.getTime();
 
-	if ( !postData.timestamp ) postData.timestamp = timestamp;
-
 	// TEMPORARY // Add Randomness to make the request fail sometimes
 	if ( Math.random() > 0.8 ) {
 		url = 'http://bifrost-test.localhost:81';
 	}
 	// TEMPORARY //
+
+	
+	if ( !postData.timestamp ) postData.timestamp = timestamp;
+
+	// TEMPORARY - read image from txt - final will be image from postData
+	if ( !postData.image ) {
+		
+		fs.readFile( './app/data/gif.txt', 'utf-8', function(err, data) {
+			if ( err ) throw err;
+
+			postData.image = data;
+			launchRequest( url, postData, fromQueue );
+		});
+
+	} else {
+
+		launchRequest( url, postData, fromQueue );
+	}
+}
+
+var launchRequest = function( url, postData, fromQueue ) {
 	
 	request.post( url, {form : postData}, function ( error, response, body ) {
 
 		if (!error && response.statusCode == 200) {
 
-			// console.log( "data posted", postData );
-
+			// retry from queue succeeded - delete file in queue
 			if ( fromQueue ) {
 				fs.unlink( pathQueue + '/' + postData.timestamp + '.txt', function(err) {
 					if (err) throw err;
@@ -45,6 +63,8 @@ var proxyPost = function( postData, fromQueue ) {
 			else expressResponse.send( body );
 
 		} else {
+
+			// failed - handle error
 			onProxyError( postData, fromQueue );
 		}
 	});
@@ -54,11 +74,13 @@ var onProxyError = function( postData, fromQueue ) {
 
 	if ( fromQueue ) {
 
+		// Failed again - keep in queue
 		if ( retryTimeout ) clearTimeout( retryTimeout );
 		retryTimeout = setTimeout( handleQueue, 5000 );
 
 	} else {
 
+		// Write file in queue
 		fs.writeFile( pathQueue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
 
 			if ( err ) throw err;
@@ -66,30 +88,31 @@ var onProxyError = function( postData, fromQueue ) {
 			if ( retryTimeout ) clearTimeout( retryTimeout );
 			retryTimeout = setTimeout( handleQueue, 5000 );
 
-			expressResponse.send("Server is idle - data saved - automatic retry later");
+			expressResponse.send("Server is idle - data saved - automated retry upcoming.");
 		});
 	}
 };
 
 var handleQueue = function() {
 
-	// TODO List files in queue
+	// List files in /app/queue
 	fs.readdir( pathQueue, function (err, files) {
 		if (err) throw err;
 
-		// console.log("Handle Queue", files, files.length);
-
+		// Filter to remove unwanted files
 		files = files.filter( function(a){ return a.match(/\.txt$/); } );
 		if ( files.length == 0 ) clearTimeout( retryTimeout );
+
+		// Retry post
 		readQueuedFiles(files);
 	});
-	// JSON.parse
 };
 
 var readQueuedFiles = function ( files ) {
 
 	files.forEach( function( file ) {
 
+		// Read file content and send post
 		fs.readFile( pathQueue + '/' + file, function (err, data) {
 			if (err) throw err;
 			proxyPost( JSON.parse(data), true );
@@ -111,7 +134,6 @@ app.get('/', function ( req, res ) {
 });
 
 app.post('/', function ( req, res ) {
-
 	expressResponse = res;
 	proxyPost( req.body, false );
 });
