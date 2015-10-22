@@ -36,3 +36,10 @@
 ehthumbs.db
 Icon?
 Thumbs.db
+
+
+# Node modules #
+######################
+# use `npm install`
+node_modules/
+
