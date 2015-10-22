@@ -5,6 +5,7 @@ var
 	
 	ip = require('ip'),
 	fs = require('fs'),
+	fsExtra = require('fs-extra'),
 	request = require('request'),
 	bodyParser = require('body-parser'),
 	express = require('express');
@@ -24,7 +25,7 @@ var proxyPost = function( postData, fromQueue ) {
 		timestamp = date.getTime();
 
 	// TEMPORARY // Add Randomness to make the request fail sometimes
-	if ( Math.random() > 0.8 ) {
+	if ( Math.random() > 0.6 ) {
 		url = 'http://bifrost-test.localhost:81';
 	}
 	// TEMPORARY //
@@ -80,17 +81,25 @@ var onProxyError = function( postData, fromQueue ) {
 
 	} else {
 
-		// Write file in queue
-		fs.writeFile( pathQueue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
-
+		fsExtra.ensureDir( pathQueue, function(err) {
 			if ( err ) throw err;
-
-			if ( retryTimeout ) clearTimeout( retryTimeout );
-			retryTimeout = setTimeout( handleQueue, 5000 );
-
-			expressResponse.send("Server is idle - data saved - automated retry upcoming.");
-		});
+			writeQueuedFile( postData );
+		} );
 	}
+};
+
+var writeQueuedFile = function ( postData ) {
+	
+	// Write file in queue
+	fs.writeFile( pathQueue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
+
+		if ( err ) throw err;
+
+		if ( retryTimeout ) clearTimeout( retryTimeout );
+		retryTimeout = setTimeout( handleQueue, 5000 );
+
+		expressResponse.send("Server is idle - data saved - automated retry upcoming.");
+	});
 };
 
 var handleQueue = function() {
