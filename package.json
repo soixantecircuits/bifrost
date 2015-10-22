@@ -1,0 +1,21 @@
+{
+  "name": "bifrost",
+  "version": "0.0.1",
+  "description": "A cache gateway for posting in the past",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/soixantecircuits/bifrost"
+  },
+  "keywords": [
+    "cache",
+    "gateway",
+    "proxy",
+    "queue"
+  ],
+  "author": "Soixante circuits",
+  "license": "MIT"
+}
