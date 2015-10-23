@@ -1,5 +1,5 @@
 # Bifrost
-
+![logo](http://norse-mythology.org/wp-content/uploads/2012/11/Bifrost.jpg)
 # Description
 
 Bifrost cache and queue your POST request when internet is down. It will try to forward your query to the desired endpoint, if it fail it will save the POST data and try to update them periodically.
