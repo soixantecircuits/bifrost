@@ -1,6 +1,13 @@
 
 'use strict';
 
+var 
+	fsExtra = require('fs-extra');
+
+var 
+	retryTimeout,
+	pathQueue = "./app/queue";
+
 var Queue = function() {
 
 
