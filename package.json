@@ -25,6 +25,7 @@
     "ip": "~1.0.1",
     "request": "~2.65.0",
     "fs-extra": "~0.24.0",
-    "eventemitter2": "~0.4.14"
+    "graceful-fs": "~4.1.2",
+    "nanotimer": "~0.3.10"
   }
 }
