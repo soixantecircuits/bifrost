@@ -1,12 +1,16 @@
 {
+	"server" : {
+		"port" : 3000
+	},
 	"proxy" : {
 		"url" : "http://bifrost-test.localhost"
 	},
 	"path" : {
 		"queue" : "./app/queue"
 	},
+	"timeout" : "30s",
 	"dev" : {
-		"mode" : false,
+		"mode" : true,
 		"image" : false,
 		"success" : 0.6
 	}

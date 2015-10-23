@@ -5,11 +5,7 @@ var
 	config = require('./config/config.json'),
 	EventDispatcher = require('./eventDispatcher'),
 	request = require('request'),
-	fs = require('fs');
-
-var 
-	retryTimeout,
-	pathQueue = "./app/queue";
+	fs = require('graceful-fs');
 
 var Proxy = function () {
 

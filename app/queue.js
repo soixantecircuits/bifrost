@@ -4,7 +4,7 @@
 var 
 	config = require('./config/config.json'),
 	EventDispatcher = require('./eventDispatcher'),
-	fs = require('fs'),
+	fs = require('graceful-fs'),
 	fsExtra = require('fs-extra');
 
 var Queue = function() {
@@ -37,7 +37,17 @@ var Queue = function() {
 
 			// Filter to remove unwanted files
 			files = files.filter( function(a){ return a.match(/\.txt$/); } );
-			if ( files.length == 0 ) EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
+			console.log("Handle Queue - ", files.length);
+
+			if ( files.length == 0 ) {
+
+				console.log("Clear timer and delete folder");
+
+				deleteFolder();
+				EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
+			} else {
+				EventDispatcher.emit( EventDispatcher.START_TIMER );
+			}
 
 			// Retry post
 			readQueuedFiles(files);
@@ -58,6 +68,12 @@ var Queue = function() {
 
 	var deleteFile = function ( timestamp ) {
 		fs.unlink( config.path.queue + '/' + timestamp + '.txt', function(err) {
+			if (err) throw err;
+		});
+	};
+
+	var deleteFolder = function() {
+		fs.rmdir( config.path.queue, function(err) {
 			if (err) throw err;
 		});
 	};

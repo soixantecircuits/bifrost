@@ -4,7 +4,9 @@ var
 	Queue = require('./app/queue'),
 	EventDispatcher = require('./app/eventDispatcher'),
 	pjson = require('./package.json'),
+	config = require('./app/config/config.json'),
 	
+	NanoTimer = require('nanotimer'),
 	ip = require('ip'),
 	bodyParser = require('body-parser'),
 	express = require('express');
@@ -12,7 +14,7 @@ var
 // Variables
 var 
 	expressResponse,
-	retryTimeout;
+	timer = new NanoTimer();
 
 // INIT App
 var app = express();
@@ -40,51 +42,39 @@ var onProxyPost = function( body, fromQueue ) {
 };
 
 var onProxySuccess = function( body ) {
-
 	expressResponse.send( "PROXY Success" );
 };
 
 var onProxyError = function( postData, fromQueue ) {
 
-	if ( fromQueue ) {
-
-		// Failed again - keep in queue
+	if ( fromQueue ) // Failed again - keep in queue
 		EventDispatcher.emit( EventDispatcher.START_TIMER );
-
-	} else {
-
+	else 
 		Queue.writeFile( postData );
-		// expressResponse.send( "PROXY Error" );
-	}
 };
 
 var onStartTimer = function() {
-
 	clearTimer();
-	retryTimeout = setTimeout( Queue.handle, 5000 );
+	timer.setTimeout( Queue.handle, '', config.timeout );
 };
 
 var onClearTimer = function() {
-
 	clearTimer();
 };
 
 var clearTimer = function() {
-
-	if ( retryTimeout ) clearTimeout( retryTimeout );
+	if ( timer ) timer.clearTimeout();
 };
 
 var onFileQueued = function() {
-
 	expressResponse.send("Server is idle - data saved - automated retry upcoming.");
 };
 var onFileDelete = function ( timestamp ) {
-
 	Queue.deleteFile( timestamp );
 };
 
 // Start server
-var server = app.listen(3000, function () {
+var server = app.listen(config.server.port, function () {
 	
 	EventDispatcher.on( EventDispatcher.PROXY_POST, onProxyPost );
 	EventDispatcher.on( EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess );
@@ -97,6 +87,15 @@ var server = app.listen(3000, function () {
 	EventDispatcher.on( EventDispatcher.CLEAR_TIMER, onClearTimer );
 
 	var port = server.address().port;
+	
+	console.log("  ____  _  __               _   ");
+	console.log(" |  _ \\(_)/ _|             | |  ");
+	console.log(" | |_) |_| |_ _ __ ___  ___| |_ ");
+	console.log(" |  _ <| |  _| '__/ _ \\/ __| __|");
+	console.log(" | |_) | | | | | | (_) \\__ | |_ ");
+	console.log(" |____/|_|_| |_|  \\___/|___/\\__|");
+	console.log("                                ");
+	console.log("                                ");
 	console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version, ip.address(), port);
 });
 
