@@ -33,7 +33,11 @@ var Queue = function() {
 
 		// List files in /app/queue
 		fs.readdir( config.path.queue, function (err, files) {
-			if (err) throw err;
+			
+			if (err) { 
+				console.log( "Queue is currently empty" ); 
+				return;
+			}
 
 			// Filter to remove unwanted files
 			files = files.filter( function(a){ return a.match(/\.txt$/); } );

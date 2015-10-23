@@ -97,6 +97,9 @@ var server = app.listen(config.server.port, function () {
 	console.log("                                ");
 	console.log("                                ");
 	console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version, ip.address(), port);
+
+	// On script launch handle queue
+	Queue.handle();
 });
 
 
