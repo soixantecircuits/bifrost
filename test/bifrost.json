@@ -1,0 +1,48 @@
+{
+	"id": "6cbb021a-2116-3c08-048a-bfd04c9f9b17",
+	"name": "bifrost",
+	"description": "",
+	"order": [
+		"8e6cdc24-96a6-5be4-fd6a-f8d3e2611022"
+	],
+	"folders": [],
+	"timestamp": 1445594717062,
+	"owner": 0,
+	"remoteLink": "",
+	"public": false,
+	"requests": [
+		{
+			"id": "8e6cdc24-96a6-5be4-fd6a-f8d3e2611022",
+			"headers": "",
+			"url": "http://localhost:3000/",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "6cbb021a-2116-3c08-048a-bfd04c9f9b17",
+			"data": [
+				{
+					"key": "key1",
+					"value": "value1",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "key2",
+					"value": "value2",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "post",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1445594788490,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		}
+	]
+}
