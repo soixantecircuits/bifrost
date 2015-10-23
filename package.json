@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "newman -c ./test/bifrost.json"
+    "test": "newman -c ./test/bifrost.json -n 2000"
   },
   "repository": {
     "type": "git",
@@ -28,5 +28,7 @@
     "nanotimer": "~0.3.10",
     "request": "~2.65.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "newman": "^1.2.23"
+  }
 }
