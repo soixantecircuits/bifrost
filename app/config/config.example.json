@@ -1,5 +1,13 @@
 {
 	"proxy" : {
 		"url" : "http://bifrost-test.localhost"
+	},
+	"path" : {
+		"queue" : "./app/queue"
+	},
+	"dev" : {
+		"mode" : false,
+		"image" : false,
+		"success" : 0.6
 	}
 }
