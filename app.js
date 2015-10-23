@@ -6,6 +6,7 @@ var
 	pjson = require('./package.json'),
 	config = require('./app/config/config.json'),
 	
+	fs = require('graceful-fs'),
 	NanoTimer = require('nanotimer'),
 	ip = require('ip'),
 	bodyParser = require('body-parser'),
@@ -23,11 +24,26 @@ var app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
 
 // Routes
 app.get('/', function ( req, res ) {
+	
+	var lengthQueue = 0;
+	fs.readdir( config.path.queue, function (err, files) {
+		if (err) {
+			lengthQueue = 0;
+			res.render('index', { lengthQueue : lengthQueue });
+			return;			
+		}
 
-	res.send('Bifrost has started!');
+		// Filter to remove unwanted files
+		files = files.filter( function(a){ return a.match(/\.txt$/); } );
+		lengthQueue = files.length;
+
+		res.render('index', { lengthQueue : lengthQueue });
+	});
 });
 
 app.post('/', function ( req, res ) {
