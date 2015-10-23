@@ -11,6 +11,8 @@ It will forward the response as it is.
 
 `npm install`
 
+Create a app/config/config.json file based on app/config/config.example.json
+
 `npm start`
 
 You should see in the log a line with the port and adress where bifrost is running.
