@@ -22,3 +22,7 @@ Now you can post directly their and do not worry about the connectivity.
 # Docs
 
 You can check the future wiki.
+
+# Test
+
+`npm test` uses norman to post 2000 requests
