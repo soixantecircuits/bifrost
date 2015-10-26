@@ -31,7 +31,4 @@ You can check the future wiki.
 
 # Dev mode
 
-in /app/config/config.json 
-set `dev > mode` to `true` to fake failing calls
-set `dev > image` to `true` to read gif from txt example
-set `dev > success` to a value between 0 and 1 to set the rate of failure ( 0 : fail - 1 : succeed )
+in /app/config/config.json, set `dev > mode` to `true` to perform fake requests
