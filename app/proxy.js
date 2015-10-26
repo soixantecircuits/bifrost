@@ -35,31 +35,7 @@ var Proxy = function () {
 
 				launchRequest( url, postData, fromQueue );
 			});
-
-			/*
-			// Add Randomness to make the request fail sometimes
-			if ( Math.random() > config.dev.success ) {
-				url = 'http://bifrost-test.localhost:81';
-			}
 			
-			// Read image from txt - final will be image from postData
-			if ( config.dev.image ) {
-				if ( !postData.image ) {
-					
-					fs.readFile( './app/data/gif.txt', 'utf-8', function(err, data) {
-						if ( err ) throw err;
-						postData.image = data;
-						launchRequest( url, postData, fromQueue );
-					});
-
-				} else {
-					launchRequest( url, postData, fromQueue );
-				}
-			} else {
-				launchRequest( url, postData, fromQueue );
-			}
-			*/
-
 		} 
 		// PRODUCTION MODE
 		else {

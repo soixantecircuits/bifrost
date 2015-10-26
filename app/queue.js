@@ -27,7 +27,7 @@ var Queue = function() {
 				// throw err;
 			}
 
-			EventDispatcher.emit( EventDispatcher.START_TIMER );
+			if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
 			EventDispatcher.emit( EventDispatcher.FILE_QUEUED );
 		});
 	};
@@ -54,7 +54,7 @@ var Queue = function() {
 				EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
 
 			} else {
-				EventDispatcher.emit( EventDispatcher.START_TIMER );
+				if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
 			}
 
 			// Retry post

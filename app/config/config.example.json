@@ -3,15 +3,14 @@
 		"port" : 3000
 	},
 	"proxy" : {
-		"url" : "http://bifrost-test.localhost"
+		"url" : "http://coca-bercy.bonhommestudio.com/api/gif/",
+		"timeout" : "30s",
+		"autostart" : true
 	},
 	"path" : {
 		"queue" : "./app/queue"
 	},
-	"timeout" : "30s",
 	"dev" : {
-		"mode" : false,
-		"image" : false,
-		"success" : 0.6
+		"mode" : false
 	}
 }
