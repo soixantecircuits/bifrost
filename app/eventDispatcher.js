@@ -13,6 +13,7 @@ var EventDispatcher = function () {
 	this.PROXY_POST_ERROR = 'PROXY_POST_ERROR';
 
 	this.FILE_QUEUED = 'FILE_QUEUED';
+	this.FILE_ERROR = 'FILE_ERROR';
 	this.DELETE_FROM_QUEUE = 'DELETE_FROM_QUEUE';
 
 	this.START_TIMER = 'START_TIMER';

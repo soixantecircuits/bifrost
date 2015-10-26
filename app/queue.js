@@ -22,7 +22,10 @@ var Queue = function() {
 		// Write file in queue
 		fs.writeFile( config.path.queue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
 
-			if ( err ) throw err;
+			if ( err ) {
+				EventDispatcher.emit( EventDispatcher.FILE_ERROR );
+				// throw err;
+			}
 
 			EventDispatcher.emit( EventDispatcher.START_TIMER );
 			EventDispatcher.emit( EventDispatcher.FILE_QUEUED );
@@ -49,6 +52,7 @@ var Queue = function() {
 
 				deleteFolder();
 				EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
+
 			} else {
 				EventDispatcher.emit( EventDispatcher.START_TIMER );
 			}
