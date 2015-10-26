@@ -16,6 +16,7 @@ var
 var 
 	expressResponse,
 	visualResponse,
+	responseSent = false,
 	timer = new NanoTimer();
 
 // INIT App
@@ -40,7 +41,6 @@ app.use(function(req, res, next) {
 
 // Routes
 app.get('/', function ( req, res ) {
-
 	visualResponse = res;
 	displayQueueLength();
 });
@@ -53,7 +53,7 @@ app.post('/', function ( req, res ) {
 	
 	var requestData = req.body;
 
-	if ( requestData.type == 'POST' ) {
+	if ( !requestData.type || requestData.type == 'POST' ) {
 		expressResponse = res;
 		EventDispatcher.emit( EventDispatcher.PROXY_POST, requestData, false );
 	} else {
@@ -87,7 +87,10 @@ var onProxyPost = function( body, fromQueue ) {
 };
 
 var onProxySuccess = function( body ) {
-	expressResponse.status(200).json({ "proxy" : "success" });
+	if ( !responseSent ) {
+		expressResponse.status(200).json( body );
+		responseSent = true;
+	}
 };
 
 var onProxyError = function( postData, fromQueue ) {
@@ -100,7 +103,7 @@ var onProxyError = function( postData, fromQueue ) {
 
 var onStartTimer = function() {
 	clearTimer();
-	timer.setTimeout( Queue.handle, [timer], config.timeout );
+	timer.setTimeout( Queue.handle, [timer], config.proxy.timeout );
 };
 
 var onClearTimer = function() {
@@ -108,15 +111,20 @@ var onClearTimer = function() {
 };
 
 var clearTimer = function() {
-	// if ( timer ) timer.clearTimeout();
 	timer.clearTimeout();
 };
 
 var onFileQueued = function() {
-	expressResponse.status(200).json({ "proxy" : "saved" });
+	if ( !responseSent ) {
+		expressResponse.status(200).json({ "proxy" : "saved" });
+		responseSent = true;
+	}
 };
 var onFileError = function() {
-	expressResponse.status(500).json({ "error" : "not able to save the request" });
+	if ( !responseSent ) {
+		expressResponse.status(500).json({ "error" : "not able to save the request" });
+		responseSent = true;
+	}
 };
 var onFileDelete = function ( timestamp ) {
 	Queue.deleteFile( timestamp );

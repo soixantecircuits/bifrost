@@ -5,6 +5,7 @@ var
 	config = require('./config/config.json'),
 	EventDispatcher = require('./eventDispatcher'),
 	request = require('request'),
+	querystring = require('querystring'),
 	fs = require('graceful-fs');
 
 var Proxy = function () {
@@ -13,6 +14,7 @@ var Proxy = function () {
 
 		var 
 			url = postData.url || config.proxy.url,
+			data = postData.data || postData,
 			date = new Date(),
 			timestamp = date.getTime();
 		
@@ -21,6 +23,20 @@ var Proxy = function () {
 		// DEV MODE
 		if ( config.dev.mode ) {
 
+			var url = "http://coca-bercy.bonhommestudio.com/api/gif/";
+
+			fs.readFile( './test/request.txt', 'utf-8', function(err, data) {
+				if ( err ) throw err;
+
+				postData = {};
+				postData.url = url;
+				postData.type = 'POST';
+				postData.data = JSON.parse(data).data;
+
+				launchRequest( url, postData, fromQueue );
+			});
+
+			/*
 			// Add Randomness to make the request fail sometimes
 			if ( Math.random() > config.dev.success ) {
 				url = 'http://bifrost-test.localhost:81';
@@ -42,26 +58,43 @@ var Proxy = function () {
 			} else {
 				launchRequest( url, postData, fromQueue );
 			}
+			*/
 
 		} 
 		// PRODUCTION MODE
 		else {
-			launchRequest( url, postData.data, fromQueue );
+
+			postData.url = url;
+			postData.type = 'POST';
+
+			launchRequest( url, postData, fromQueue );
 		}
 	};
 
 	// Perform proxy request
 	var launchRequest = function( url, postData, fromQueue ) {
 
-		request.post( url, {form : postData}, function ( error, response, body ) {
+		console.log("launchRequest", url);
 
-			if (!error && response.statusCode == 200) {
+		// postData.formData = querystring.parse( postData.data );
+
+		request.post( url, {form : postData }, function ( error, response, body ) {
+
+			if (!error && response && response.statusCode == 200) {
 
 				// retry from queue succeeded - delete file in queue
-				if ( fromQueue ) EventDispatcher.emit( EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp );
-				else EventDispatcher.emit( EventDispatcher.PROXY_POST_SUCCESS, body );
+				if ( fromQueue ) {
+					console.log("success + deleted");
+					EventDispatcher.emit( EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp );
+				} else {
+					console.log("success");
+					EventDispatcher.emit( EventDispatcher.PROXY_POST_SUCCESS, body );
+				}
 
-			} else EventDispatcher.emit( EventDispatcher.PROXY_POST_ERROR, postData, fromQueue );
+			} else {
+				console.log("fail - but saved");
+				EventDispatcher.emit( EventDispatcher.PROXY_POST_ERROR, postData, fromQueue );
+			}
 		});
 	};
 

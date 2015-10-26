@@ -81,7 +81,7 @@ var Queue = function() {
 	};
 
 	var deleteFolder = function() {
-		fs.rmdir( config.path.queue, function(err) {
+		fsExtra.remove( config.path.queue, function(err) {
 			if (err) throw err;
 		});
 	};
