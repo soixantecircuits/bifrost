@@ -95,9 +95,9 @@ var onProxySuccess = function( body ) {
 
 var onProxyError = function( postData, fromQueue ) {
 
-	if ( fromQueue ) // Failed again - keep in queue
-		EventDispatcher.emit( EventDispatcher.START_TIMER );
-	else
+	if ( fromQueue ) { // Failed again - keep in queue
+		if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
+	} else
 		Queue.writeFile( postData );
 };
 
