@@ -56,9 +56,6 @@ var Proxy = function () {
 
 			if (!error && response.statusCode == 200) {
 
-				console.log( response );
-				console.log( body );
-
 				// retry from queue succeeded - delete file in queue
 				if ( fromQueue ) EventDispatcher.emit( EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp );
 				else EventDispatcher.emit( EventDispatcher.PROXY_POST_SUCCESS, body );
