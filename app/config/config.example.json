@@ -10,7 +10,7 @@
 	},
 	"timeout" : "30s",
 	"dev" : {
-		"mode" : true,
+		"mode" : false,
 		"image" : false,
 		"success" : 0.6
 	}
