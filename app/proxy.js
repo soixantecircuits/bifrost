@@ -12,7 +12,6 @@ var Proxy = function () {
 	var post = function( postData, fromQueue ) {
 
 		var 
-			url = config.proxy.url,
 			date = new Date(),
 			timestamp = date.getTime();
 		
@@ -46,7 +45,7 @@ var Proxy = function () {
 		} 
 		// PRODUCTION MODE
 		else {
-			launchRequest( url, postData, fromQueue );
+			launchRequest( postData.url, postData.data, fromQueue );
 		}
 	};
 

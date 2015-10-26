@@ -27,4 +27,4 @@ You can check the future wiki.
 
 # Test
 
-`npm test` uses norman to post 2000 requests
+`npm test` uses newman to post 2000 requests
