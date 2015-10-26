@@ -52,9 +52,9 @@ var Proxy = function () {
 
 		console.log("launchRequest", url);
 
-		// postData.formData = querystring.parse( postData.data );
-
-		request.post( url, {form : postData }, function ( error, response, body ) {
+		postData.formData = querystring.parse( postData.data );
+		
+		request.post( url, {form : postData.formData }, function ( error, response, body ) {
 
 			if (!error && response && response.statusCode == 200) {
 
