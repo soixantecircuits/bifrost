@@ -57,7 +57,7 @@ app.post('/', function ( req, res ) {
 		expressResponse = res;
 		EventDispatcher.emit( EventDispatcher.PROXY_POST, requestData, false );
 	} else {
-		res.send('Type not supported - Bifrost only handle POST Requests');
+		res.status(500).json({ "error" : "Type not supported - Bifrost only handle POST Requests" });
 	}
 });
 
