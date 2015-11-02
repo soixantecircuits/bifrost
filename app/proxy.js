@@ -12,12 +12,12 @@ var Proxy = function () {
 
 	var post = function( postData, fromQueue ) {
 
-		var 
+		var
 			url = postData.url || config.proxy.url,
 			data = postData.data || postData,
 			date = new Date(),
 			timestamp = date.getTime();
-		
+
 		if ( !postData.timestamp ) postData.timestamp = timestamp;
 
 		// DEV MODE
@@ -35,8 +35,8 @@ var Proxy = function () {
 
 				launchRequest( url, postData, fromQueue );
 			});
-			
-		} 
+
+		}
 		// PRODUCTION MODE
 		else {
 
@@ -53,7 +53,7 @@ var Proxy = function () {
 		console.log("launchRequest", url);
 
 		postData.formData = querystring.parse( postData.data );
-		
+
 		request.post( url, {form : postData.formData }, function ( error, response, body ) {
 
 			if (!error && response && response.statusCode == 200) {
@@ -64,6 +64,7 @@ var Proxy = function () {
 					EventDispatcher.emit( EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp );
 				} else {
 					console.log("success");
+					console.log("request respond with body: ", body);
 					EventDispatcher.emit( EventDispatcher.PROXY_POST_SUCCESS, body );
 				}
 
