@@ -49,3 +49,4 @@ npm-debug.log
 # temp files in /app/queue
 app/queue/
 app/config/config.json
+config.json
