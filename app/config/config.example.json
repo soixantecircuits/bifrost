@@ -1,0 +1,16 @@
+{
+  "server" : {
+    "port" : 3002
+  },
+  "proxy" : {
+    "url" : "http://xxx/api/post/",
+    "timeout" : "30s",
+    "autostart" : true
+  },
+  "path" : {
+    "queue" : "./app/queue"
+  },
+  "dev" : {
+    "mode" : false
+  }
+}
