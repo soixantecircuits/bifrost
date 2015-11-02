@@ -20,14 +20,14 @@ var Queue = function() {
 	var writeQueuedFile = function ( postData ) {
 
 		// Write file in queue
-		fs.writeFile( config.path.queue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
+		fs.writeFile( config.path.queue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
 
 			if ( err ) {
 				EventDispatcher.emit( EventDispatcher.FILE_ERROR );
 				// throw err;
 			}
 
-			EventDispatcher.emit( EventDispatcher.START_TIMER );
+			if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
 			EventDispatcher.emit( EventDispatcher.FILE_QUEUED );
 		});
 	};
@@ -54,7 +54,7 @@ var Queue = function() {
 				EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
 
 			} else {
-				EventDispatcher.emit( EventDispatcher.START_TIMER );
+				if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
 			}
 
 			// Retry post
@@ -81,7 +81,7 @@ var Queue = function() {
 	};
 
 	var deleteFolder = function() {
-		fs.rmdir( config.path.queue, function(err) {
+		fsExtra.remove( config.path.queue, function(err) {
 			if (err) throw err;
 		});
 	};
@@ -94,4 +94,3 @@ var Queue = function() {
 };
 
 module.exports = new Queue();
-

@@ -28,3 +28,10 @@ You can check the future wiki.
 # Test
 
 `npm test` uses newman to post 2000 requests
+<<<<<<< HEAD
+=======
+
+# Dev mode
+
+in /app/config/config.json, set `dev > mode` to `true` to perform fake requests
+>>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
