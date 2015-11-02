@@ -52,7 +52,9 @@ var Proxy = function () {
 
 		console.log("launchRequest", url);
 
-		postData.formData = querystring.parse( postData.data );
+		postData.formData = postData.formData || querystring.parse( postData.data );
+
+		console.log(postData.formData);
 
 		request.post( url, {form : postData.formData }, function ( error, response, body ) {
 
@@ -70,6 +72,7 @@ var Proxy = function () {
 
 			} else {
 				console.log("fail - but saved");
+				//console.log(body);
 				EventDispatcher.emit( EventDispatcher.PROXY_POST_ERROR, postData, fromQueue );
 			}
 		});

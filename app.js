@@ -1,19 +1,21 @@
 // Require
-var 
+var
 	Proxy = require('./app/proxy'),
 	Queue = require('./app/queue'),
 	EventDispatcher = require('./app/eventDispatcher'),
 	pjson = require('./package.json'),
 	config = require('./app/config/config.json'),
-	
+
 	fs = require('graceful-fs'),
 	NanoTimer = require('nanotimer'),
 	ip = require('ip'),
 	bodyParser = require('body-parser'),
-	express = require('express');
+	express = require('express'),
+	multer  = require('multer'),
+	upload = multer({ dest: 'uploads/' });
 
 // Variables
-var 
+var
 	expressResponse,
 	visualResponse,
 	responseSent = false,
@@ -27,7 +29,7 @@ var bodyparserLimit = '100mb';
 app.use(bodyParser.json({limit: bodyparserLimit }));
 app.use(bodyParser.urlencoded({limit: bodyparserLimit, extended: true}));
 
-// Settings - Front view 
+// Settings - Front view
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
@@ -49,9 +51,12 @@ app.get('/alive', function(req, res) {
 	res.status(200).json({ "alive" : 2007 })
 });
 
-app.post('/', function ( req, res ) {
-	
+//app.post('/', upload.array(), function ( req, res ) {
+app.post('/', upload.array(), function ( req, res ) {
+
 	var requestData = req.body;
+
+	//console.log(req.body);
 
 	if ( !requestData.type || requestData.type == 'POST' ) {
 		expressResponse = res;
@@ -69,7 +74,7 @@ var displayQueueLength = function() {
 		if (err) {
 			lengthQueue = 0;
 			visualResponse.render('index', { lengthQueue : lengthQueue });
-			return;			
+			return;
 		}
 
 		// Filter to remove unwanted files
@@ -132,7 +137,7 @@ var onFileDelete = function ( timestamp ) {
 
 // Start server
 var server = app.listen(config.server.port, function () {
-	
+
 	EventDispatcher.on( EventDispatcher.PROXY_POST, onProxyPost );
 	EventDispatcher.on( EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess );
 	EventDispatcher.on( EventDispatcher.PROXY_POST_ERROR, onProxyError );
@@ -145,7 +150,7 @@ var server = app.listen(config.server.port, function () {
 	EventDispatcher.on( EventDispatcher.CLEAR_TIMER, onClearTimer );
 
 	var port = server.address().port;
-	
+
 	console.log("  ____  _  __               _   ");
 	console.log(" |  _ \\(_)/ _|             | |  ");
 	console.log(" | |_) |_| |_ _ __ ___  ___| |_ ");
