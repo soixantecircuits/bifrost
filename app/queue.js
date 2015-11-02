@@ -1,96 +1,95 @@
-
 'use strict';
 
-var 
-	config = require('./config/config.json'),
-	EventDispatcher = require('./eventDispatcher'),
-	fs = require('graceful-fs'),
-	fsExtra = require('fs-extra');
+var
+  config = require('./config/config.json'),
+  EventDispatcher = require('./eventDispatcher'),
+  fs = require('graceful-fs'),
+  fsExtra = require('fs-extra');
 
 var Queue = function() {
 
-	var writeFile = function( postData ) {
-		
-		fsExtra.ensureDir( config.path.queue, function(err) {
-			if ( err ) throw err;
-			writeQueuedFile( postData );
-		} );
-	};
+  var writeFile = function( postData ) {
 
-	var writeQueuedFile = function ( postData ) {
+    fsExtra.ensureDir( config.path.queue, function(err) {
+      if ( err ) throw err;
+      writeQueuedFile( postData );
+    } );
+  };
 
-		// Write file in queue
-		fs.writeFile( config.path.queue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
+  var writeQueuedFile = function ( postData ) {
 
-			if ( err ) {
-				EventDispatcher.emit( EventDispatcher.FILE_ERROR );
-				// throw err;
-			}
+    // Write file in queue
+    fs.writeFile( config.path.queue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
 
-			if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
-			EventDispatcher.emit( EventDispatcher.FILE_QUEUED );
-		});
-	};
+      if ( err ) {
+        EventDispatcher.emit( EventDispatcher.FILE_ERROR );
+        // throw err;
+      }
 
-	var handle = function() {
+      if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
+      EventDispatcher.emit( EventDispatcher.FILE_QUEUED );
+    });
+  };
 
-		// List files in /app/queue
-		fs.readdir( config.path.queue, function (err, files) {
-			
-			if (err) { 
-				console.log( "Queue is currently empty" ); 
-				return;
-			}
+  var handle = function() {
 
-			// Filter to remove unwanted files
-			files = files.filter( function(a){ return a.match(/\.txt$/); } );
-			console.log("Handle Queue - ", files.length);
+    // List files in /app/queue
+    fs.readdir( config.path.queue, function (err, files) {
 
-			if ( files.length == 0 ) {
+      if (err) {
+        console.log( "Queue is currently empty" );
+        return;
+      }
 
-				console.log("Clear timer and delete folder");
+      // Filter to remove unwanted files
+      files = files.filter( function(a){ return a.match(/\.txt$/); } );
+      console.log("Handle Queue - ", files.length);
 
-				deleteFolder();
-				EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
+      if ( files.length == 0 ) {
 
-			} else {
-				if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
-			}
+        console.log("Clear timer and delete folder");
 
-			// Retry post
-			readQueuedFiles(files);
-		});
-	};
+        deleteFolder();
+        EventDispatcher.emit( EventDispatcher.CLEAR_TIMER );
 
-	var readQueuedFiles = function ( files ) {
+      } else {
+        if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
+      }
 
-		files.forEach( function( file ) {
+      // Retry post
+      readQueuedFiles(files);
+    });
+  };
 
-			// Read file content and send post
-			fs.readFile( config.path.queue + '/' + file, function (err, data) {
-				if (err) throw err;
-				EventDispatcher.emit( EventDispatcher.PROXY_POST, JSON.parse(data), true );
-			});
-		});
-	};
+  var readQueuedFiles = function ( files ) {
 
-	var deleteFile = function ( timestamp ) {
-		fs.unlink( config.path.queue + '/' + timestamp + '.txt', function(err) {
-			if (err) throw err;
-		});
-	};
+    files.forEach( function( file ) {
 
-	var deleteFolder = function() {
-		fsExtra.remove( config.path.queue, function(err) {
-			if (err) throw err;
-		});
-	};
+      // Read file content and send post
+      fs.readFile( config.path.queue + '/' + file, function (err, data) {
+        if (err) throw err;
+        EventDispatcher.emit( EventDispatcher.PROXY_POST, JSON.parse(data), true );
+      });
+    });
+  };
 
-	return {
-		writeFile : writeFile,
-		deleteFile : deleteFile,
-		handle : handle
-	}
+  var deleteFile = function ( timestamp ) {
+    fs.unlink( config.path.queue + '/' + timestamp + '.txt', function(err) {
+      if (err) throw err;
+    });
+  };
+
+  var deleteFolder = function() {
+    fsExtra.remove( config.path.queue, function(err) {
+      if (err) throw err;
+    });
+  };
+
+  return {
+    writeFile : writeFile,
+    deleteFile : deleteFile,
+    handle : handle
+  }
 };
 
 module.exports = new Queue();
