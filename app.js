@@ -16,10 +16,7 @@ var
 var 
 	expressResponse,
 	visualResponse,
-<<<<<<< HEAD
-=======
 	responseSent = false,
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 	timer = new NanoTimer();
 
 // INIT App
@@ -44,10 +41,6 @@ app.use(function(req, res, next) {
 
 // Routes
 app.get('/', function ( req, res ) {
-<<<<<<< HEAD
-
-=======
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 	visualResponse = res;
 	displayQueueLength();
 });
@@ -60,11 +53,7 @@ app.post('/', function ( req, res ) {
 	
 	var requestData = req.body;
 
-<<<<<<< HEAD
-	if ( requestData.type == 'POST' ) {
-=======
 	if ( !requestData.type || requestData.type == 'POST' ) {
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 		expressResponse = res;
 		EventDispatcher.emit( EventDispatcher.PROXY_POST, requestData, false );
 	} else {
@@ -98,37 +87,23 @@ var onProxyPost = function( body, fromQueue ) {
 };
 
 var onProxySuccess = function( body ) {
-<<<<<<< HEAD
-	expressResponse.status(200).json({ "proxy" : "success" });
-=======
 	if ( !responseSent ) {
 		expressResponse.status(200).json( body );
 		responseSent = true;
 	}
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 };
 
 var onProxyError = function( postData, fromQueue ) {
 
-<<<<<<< HEAD
-	if ( fromQueue ) // Failed again - keep in queue
-		EventDispatcher.emit( EventDispatcher.START_TIMER );
-	else
-=======
 	if ( fromQueue ) { // Failed again - keep in queue
 		if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
 	} else
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 		Queue.writeFile( postData );
 };
 
 var onStartTimer = function() {
 	clearTimer();
-<<<<<<< HEAD
-	timer.setTimeout( Queue.handle, [timer], config.timeout );
-=======
 	timer.setTimeout( Queue.handle, [timer], config.proxy.timeout );
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 };
 
 var onClearTimer = function() {
@@ -136,20 +111,10 @@ var onClearTimer = function() {
 };
 
 var clearTimer = function() {
-<<<<<<< HEAD
-	// if ( timer ) timer.clearTimeout();
-=======
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 	timer.clearTimeout();
 };
 
 var onFileQueued = function() {
-<<<<<<< HEAD
-	expressResponse.status(200).json({ "proxy" : "saved" });
-};
-var onFileError = function() {
-	expressResponse.status(500).json({ "error" : "not able to save the request" });
-=======
 	if ( !responseSent ) {
 		expressResponse.status(200).json({ "proxy" : "saved" });
 		responseSent = true;
@@ -160,7 +125,6 @@ var onFileError = function() {
 		expressResponse.status(500).json({ "error" : "not able to save the request" });
 		responseSent = true;
 	}
->>>>>>> 1fcbd010df3693ea205615ef93ab73941c6f1e18
 };
 var onFileDelete = function ( timestamp ) {
 	Queue.deleteFile( timestamp );
@@ -195,5 +159,4 @@ var server = app.listen(config.server.port, function () {
 	// On script launch handle queue
 	Queue.handle();
 });
-
 
