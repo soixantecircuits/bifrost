@@ -11,7 +11,9 @@ It will forward the response as it is.
 
 `npm install`
 
-Create a app/config/config.json file based on app/config/config.example.json
+### Config
+Create a app/config/config.json file based on app/config/config.example.json :
+`cp app/config/config.example.json app/config/config.json`
 
 `npm start`
 
