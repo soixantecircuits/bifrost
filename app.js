@@ -56,7 +56,7 @@ app.post('/', upload.array(), function ( req, res ) {
 
   var requestData = req.body;
 
-  //console.log(req.body);
+  console.log('req.body: ', req.body);
 
   if ( !requestData.type || requestData.type == 'POST' ) {
     expressResponse = res;

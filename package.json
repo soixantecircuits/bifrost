@@ -26,6 +26,7 @@
     "fs-extra": "~0.24.0",
     "graceful-fs": "~4.1.2",
     "ip": "~1.0.1",
+    "lodash": "^3.10.1",
     "multer": "^1.1.0",
     "nanotimer": "~0.3.10",
     "request": "~2.65.0"

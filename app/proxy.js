@@ -5,7 +5,8 @@ var
   EventDispatcher = require('./eventDispatcher'),
   request = require('request'),
   querystring = require('querystring'),
-  fs = require('graceful-fs');
+  fs = require('graceful-fs'),
+  _ = require('lodash');
 
 var Proxy = function () {
 
@@ -49,11 +50,14 @@ var Proxy = function () {
   // Perform proxy request
   var launchRequest = function( url, postData, fromQueue ) {
 
-    console.log("launchRequest", url);
+    console.log('proxy.js - launchRequest: ', url);
 
-    postData.formData = postData.formData || querystring.parse( postData.data );
+    postData.formData = postData.formData || querystring.parse( postData.data ) || _.omit(postData, 'url');
+    if(Object.keys(postData.formData).length < 1){
+      postData.formData = _.omit(postData, 'url');
+    }
 
-    console.log(postData.formData);
+    console.log('proxy.js - postData.formData:', postData.formData);
 
     request.post( url, {form : postData.formData }, function ( error, response, body ) {
 
@@ -71,7 +75,7 @@ var Proxy = function () {
 
       } else {
         console.log("fail - but saved");
-        //console.log(body);
+        console.log(body);
         EventDispatcher.emit( EventDispatcher.PROXY_POST_ERROR, postData, fromQueue );
       }
     });
