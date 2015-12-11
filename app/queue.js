@@ -64,11 +64,15 @@ var Queue = function() {
   var readQueuedFiles = function ( files ) {
 
     files.forEach( function( file ) {
-
       // Read file content and send post
       fs.readFile( config.path.queue + '/' + file, function (err, data) {
         if (err) throw err;
-        EventDispatcher.emit( EventDispatcher.PROXY_POST, JSON.parse(data), true );
+        try{
+          var dataParsed = JSON.parse(data);
+          EventDispatcher.emit( EventDispatcher.PROXY_POST, dataParsed, true );
+        } catch (err){
+          console.log(err);
+        }
       });
     });
   };

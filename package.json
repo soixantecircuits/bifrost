@@ -28,7 +28,7 @@
     "ip": "~1.0.1",
     "lodash": "^3.10.1",
     "multer": "^1.1.0",
-    "nanotimer": "~0.3.10",
+    "nanotimer": "0.3.13",
     "request": "~2.65.0"
   },
   "devDependencies": {
