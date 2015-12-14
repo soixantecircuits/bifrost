@@ -68,8 +68,8 @@ app.post('/', upload.array(), function(req, res) {
   console.log('req.body: ', req.body);
 
   if (!requestData.type || requestData.type == 'POST') {
-    expressResponse = res;
-    EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false);
+    //expressResponse = res;
+    EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res);
   } else {
     res.status(500).json({
       "error": "Type not supported - Bifrost only handle POST Requests"
@@ -104,20 +104,20 @@ var displayQueueLength = function() {
 
 
 // Handle events
-var onProxyPost = function(body, fromQueue) {
-  Proxy.post(body, fromQueue);
+var onProxyPost = function(body, fromQueue, res) {
+  Proxy.post(body, fromQueue, res);
 };
 
-var onProxySuccess = function(body) {
-  expressResponse.status(200).json(body);
+var onProxySuccess = function(body, res) {
+  res.status(200).json(body);
 };
 
-var onProxyError = function(postData, fromQueue) {
+var onProxyError = function(postData, fromQueue, res) {
 
   if (fromQueue) { // Failed again - keep in queue
     if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER);
   } else
-    Queue.writeFile(postData);
+    Queue.writeFile(postData, res);
 };
 
 var onStartTimer = function() {
@@ -135,13 +135,13 @@ var clearTimer = function() {
   }
 };
 
-var onFileQueued = function() {
-  expressResponse.status(200).json({
+var onFileQueued = function(res) {
+  res.status(200).json({
     "proxy": "saved"
   });
 };
-var onFileError = function() {
-  expressResponse.status(500).json({
+var onFileError = function(res) {
+  res.status(500).json({
     "error": "not able to save the request"
   });
 };

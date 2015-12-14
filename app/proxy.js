@@ -10,7 +10,7 @@ config = require('./config/config.json'),
 
 var Proxy = function() {
 
-  var post = function(postData, fromQueue) {
+  var post = function(postData, fromQueue, res) {
     if (fromQueue) {
       console.log('post from proxy - queue');
     } else {
@@ -38,7 +38,7 @@ var Proxy = function() {
         postData.type = 'POST';
         postData.data = JSON.parse(data).data;
 
-        launchRequest(url, postData, fromQueue);
+        launchRequest(url, postData, fromQueue, res);
       });
 
     }
@@ -48,12 +48,12 @@ var Proxy = function() {
       postData.url = url;
       postData.type = 'POST';
 
-      launchRequest(url, postData, fromQueue);
+      launchRequest(url, postData, fromQueue, res);
     }
   };
 
   // Perform proxy request
-  var launchRequest = function(url, postData, fromQueue) {
+  var launchRequest = function(url, postData, fromQueue, res) {
 
     console.log('proxy.js - launchRequest: ', url);
 
@@ -78,14 +78,13 @@ var Proxy = function() {
         } else {
           console.log("success");
           console.log("request respond with body: ", body);
-          EventDispatcher.emit(EventDispatcher.PROXY_POST_SUCCESS, body);
+          EventDispatcher.emit(EventDispatcher.PROXY_POST_SUCCESS, body, res);
         }
 
       } else {
         console.log("fail - but saved");
         console.log(body);
-        EventDispatcher.emit(EventDispatcher.PROXY_POST_ERROR, postData,
-          fromQueue);
+        EventDispatcher.emit(EventDispatcher.PROXY_POST_ERROR, postData, fromQueue, res);
       }
     });
   };

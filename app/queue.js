@@ -8,26 +8,26 @@ var
 
 var Queue = function() {
 
-  var writeFile = function( postData ) {
+  var writeFile = function( postData, res ) {
 
     fsExtra.ensureDir( config.path.queue, function(err) {
       if ( err ) throw err;
-      writeQueuedFile( postData );
+      writeQueuedFile( postData, res);
     } );
   };
 
-  var writeQueuedFile = function ( postData ) {
+  var writeQueuedFile = function ( postData, res ) {
 
     // Write file in queue
     fs.writeFile( config.path.queue + "/" + postData.timestamp + ".txt", JSON.stringify( postData ), function (err) {
 
       if ( err ) {
-        EventDispatcher.emit( EventDispatcher.FILE_ERROR );
+        EventDispatcher.emit( EventDispatcher.FILE_ERROR, res);
         // throw err;
       }
 
       if ( config.proxy.autostart ) EventDispatcher.emit( EventDispatcher.START_TIMER );
-      EventDispatcher.emit( EventDispatcher.FILE_QUEUED );
+      EventDispatcher.emit( EventDispatcher.FILE_QUEUED, res);
     });
   };
 
