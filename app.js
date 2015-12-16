@@ -1,6 +1,5 @@
 // Require
-var
-Proxy = require('./app/proxy'),
+var Proxy = require('./app/proxy'),
   Queue = require('./app/queue'),
   EventDispatcher = require('./app/eventDispatcher'),
   pjson = require('./package.json'),
@@ -14,168 +13,161 @@ Proxy = require('./app/proxy'),
   multer = require('multer'),
   upload = multer({
     dest: 'uploads/'
-  });
+  })
 
 // Variables
-var
-expressResponse,
+var expressResponse,
   visualResponse,
-  timer = new NanoTimer();
+  timer = new NanoTimer()
 
 // INIT App
-var app = express();
+var app = express()
 
 // Settings - bodyparser
-var bodyparserLimit = '100mb';
+var bodyparserLimit = '100mb'
 app.use(bodyParser.json({
   limit: bodyparserLimit
-}));
+}))
 app.use(bodyParser.urlencoded({
   limit: bodyparserLimit,
   extended: true
-}));
+}))
 
 // Settings - Front view
-app.use(express.static('public'));
-app.set('view engine', 'ejs');
+app.use(express.static('public'))
+app.set('view engine', 'ejs')
 
 // Allow cross domain requests
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept')
+  next()
+})
 
 // Routes
-app.get('/', function(req, res) {
-  visualResponse = res;
-  displayQueueLength();
-});
+app.get('/', function (req, res) {
+  visualResponse = res
+  displayQueueLength()
+})
 
-app.get('/alive', function(req, res) {
+app.get('/alive', function (req, res) {
   res.status(200).json({
-    "alive": 2007
+    'alive': 2007
   })
-});
+})
 
-//app.post('/', upload.array(), function ( req, res ) {
-app.post('/', upload.array(), function(req, res) {
+// app.post('/', upload.array(), function ( req, res ) {
+app.post('/', upload.array(), function (req, res) {
+  var requestData = req.body
 
-  var requestData = req.body;
-
-  console.log('req.body: ', req.body);
+  console.log('req.body: ', req.body)
 
   if (!requestData.type || requestData.type == 'POST') {
-    //expressResponse = res;
-    EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res);
+    // expressResponse = res
+    EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
   } else {
     res.status(500).json({
-      "error": "Type not supported - Bifrost only handle POST Requests"
-    });
+      'error': 'Type not supported - Bifrost only handle POST Requests'
+    })
   }
-});
+})
 
 // display Queue Length
-var displayQueueLength = function() {
-
-  var lengthQueue = 0;
-  fs.readdir(config.path.queue, function(err, files) {
+var displayQueueLength = function () {
+  var lengthQueue = 0
+  fs.readdir(config.path.queue, function (err, files) {
     if (err) {
-      lengthQueue = 0;
+      lengthQueue = 0
       visualResponse.render('index', {
         lengthQueue: lengthQueue
-      });
-      return;
+      })
+      return
     }
 
     // Filter to remove unwanted files
-    files = files.filter(function(a) {
-      return a.match(/\.txt$/);
-    });
-    lengthQueue = files.length;
+    files = files.filter(function (a) {
+      return a.match(/\.txt$/)
+    })
+    lengthQueue = files.length
 
     visualResponse.render('index', {
       lengthQueue: lengthQueue
-    });
-  });
-};
-
+    })
+  })
+}
 
 // Handle events
-var onProxyPost = function(body, fromQueue, res) {
-  Proxy.post(body, fromQueue, res);
-};
+var onProxyPost = function (body, fromQueue, res) {
+  Proxy.post(body, fromQueue, res)
+}
 
-var onProxySuccess = function(body, res) {
-  res.status(200).json(body);
-};
+var onProxySuccess = function (body, res) {
+  res.status(200).json(body)
+}
 
-var onProxyError = function(postData, fromQueue, res) {
-
+var onProxyError = function (postData, fromQueue, res) {
   if (fromQueue) { // Failed again - keep in queue
-    if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER);
+    if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER)
   } else
-    Queue.writeFile(postData, res);
-};
+    Queue.writeFile(postData, res)
+}
 
-var onStartTimer = function() {
-  clearTimer();
-  timer.setTimeout(Queue.handle, [timer], config.proxy.timeout);
-};
+var onStartTimer = function () {
+  clearTimer()
+  timer.setTimeout(Queue.handle, [timer], config.proxy.timeout)
+}
 
-var onClearTimer = function() {
-  clearTimer();
-};
+var onClearTimer = function () {
+  clearTimer()
+}
 
-var clearTimer = function() {
+var clearTimer = function () {
   if (timer) {
-    timer.clearTimeout();
+    timer.clearTimeout()
   }
-};
+}
 
-var onFileQueued = function(res) {
+var onFileQueued = function (res) {
   res.status(200).json({
-    "proxy": "saved"
-  });
-};
-var onFileError = function(res) {
+    'proxy': 'saved'
+  })
+}
+var onFileError = function (res) {
   res.status(500).json({
-    "error": "not able to save the request"
-  });
-};
-var onFileDelete = function(timestamp) {
-  Queue.deleteFile(timestamp);
-};
+    'error': 'not able to save the request'
+  })
+}
+var onFileDelete = function (timestamp) {
+  Queue.deleteFile(timestamp)
+}
 
 // Start server
-var server = app.listen(config.server.port, function() {
+var server = app.listen(config.server.port, function () {
+  EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost)
+  EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess)
+  EventDispatcher.on(EventDispatcher.PROXY_POST_ERROR, onProxyError)
 
-  EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost);
-  EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess);
-  EventDispatcher.on(EventDispatcher.PROXY_POST_ERROR, onProxyError);
+  EventDispatcher.on(EventDispatcher.FILE_QUEUED, onFileQueued)
+  EventDispatcher.on(EventDispatcher.FILE_ERROR, onFileError)
+  EventDispatcher.on(EventDispatcher.DELETE_FROM_QUEUE, onFileDelete)
 
-  EventDispatcher.on(EventDispatcher.FILE_QUEUED, onFileQueued);
-  EventDispatcher.on(EventDispatcher.FILE_ERROR, onFileError);
-  EventDispatcher.on(EventDispatcher.DELETE_FROM_QUEUE, onFileDelete);
+  EventDispatcher.on(EventDispatcher.START_TIMER, onStartTimer)
+  EventDispatcher.on(EventDispatcher.CLEAR_TIMER, onClearTimer)
 
-  EventDispatcher.on(EventDispatcher.START_TIMER, onStartTimer);
-  EventDispatcher.on(EventDispatcher.CLEAR_TIMER, onClearTimer);
+  var port = server.address().port
 
-  var port = server.address().port;
-
-  console.log("  ____  _  __               _   ");
-  console.log(" |  _ \\(_)/ _|             | |  ");
-  console.log(" | |_) |_| |_ _ __ ___  ___| |_ ");
-  console.log(" |  _ <| |  _| '__/ _ \\/ __| __|");
-  console.log(" | |_) | | | | | | (_) \\__ | |_ ");
-  console.log(" |____/|_|_| |_|  \\___/|___/\\__|");
-  console.log("                                ");
-  console.log("                                ");
+  console.log('  ____  _  __               _   ')
+  console.log(' |  _ \\(_)/ _|             | |  ')
+  console.log(' | |_) |_| |_ _ __ ___  ___| |_ ')
+  console.log(" |  _ <| |  _| '__/ _ \\/ __| __|")
+  console.log(' | |_) | | | | | | (_) \\__ | |_ ')
+  console.log(' |____/|_|_| |_|  \\___/|___/\\__|')
+  console.log('                                ')
+  console.log('                                ')
   console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version,
-    ip.address(), port);
+    ip.address(), port)
 
   // On script launch handle queue
-  Queue.handle();
-});
+  Queue.handle()
+})
