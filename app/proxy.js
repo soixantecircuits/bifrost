@@ -1,11 +1,11 @@
 'use strict'
 
-var config = require('./config/config.json'),
-  EventDispatcher = require('./eventDispatcher'),
-  request = require('request'),
-  querystring = require('querystring'),
-  fs = require('graceful-fs'),
-  _ = require('lodash')
+var config = require('./config/config.json')
+var EventDispatcher = require('./eventDispatcher')
+var request = require('request')
+var querystring = require('querystring')
+var fs = require('graceful-fs')
+var _ = require('lodash')
 
 var Proxy = function () {
   var post = function (postData, fromQueue, res) {
@@ -15,31 +15,28 @@ var Proxy = function () {
       console.log('post from Proxy')
     }
 
-    var url = postData.url || config.proxy.url,
-      data = postData.data || postData,
-      date = new Date(),
-      timestamp = date.getTime()
+    var url = postData.url || config.proxy.url
+    var date = new Date()
+    var timestamp = date.getTime()
 
     if (!postData.timestamp) postData.timestamp = timestamp
 
-    // DEV MODE
     if (config.dev.mode) {
-      var url = config.dev.url
+      // DEV MODE
+      var devURL = config.dev.url
 
       fs.readFile('./test/request.txt', 'utf-8', function (err, data) {
         if (err) throw err
 
         postData = {}
-        postData.url = url
+        postData.url = devURL
         postData.type = 'POST'
         postData.data = JSON.parse(data).data
 
-        launchRequest(url, postData, fromQueue, res)
+        launchRequest(devURL, postData, fromQueue, res)
       })
-
-    }
-    // PRODUCTION MODE
-    else {
+    } else {
+      // PROD MODE
       postData.url = url
       postData.type = 'POST'
 
@@ -62,7 +59,7 @@ var Proxy = function () {
     request.post(url, {
       form: postData.formData
     }, function (error, response, body) {
-      if (!error && response && response.statusCode == 200) {
+      if (!error && response && response.statusCode === 200) {
         // retry from queue succeeded - delete file in queue
         if (fromQueue) {
           console.log('success + deleted')
@@ -72,7 +69,6 @@ var Proxy = function () {
           console.log('request respond with body: ', body)
           EventDispatcher.emit(EventDispatcher.PROXY_POST_SUCCESS, body, res)
         }
-
       } else {
         console.log('fail - but saved')
         console.log(body)

@@ -1,24 +1,23 @@
 // Require
-var Proxy = require('./app/proxy'),
-  Queue = require('./app/queue'),
-  EventDispatcher = require('./app/eventDispatcher'),
-  pjson = require('./package.json'),
-  config = require('./app/config/config.json'),
+var Proxy = require('./app/proxy')
+var Queue = require('./app/queue')
+var EventDispatcher = require('./app/eventDispatcher')
+var pjson = require('./package.json')
+var config = require('./app/config/config.json')
 
-  fs = require('graceful-fs'),
-  NanoTimer = require('nanotimer'),
-  ip = require('ip'),
-  bodyParser = require('body-parser'),
-  express = require('express'),
-  multer = require('multer'),
-  upload = multer({
-    dest: 'uploads/'
-  })
+var fs = require('graceful-fs')
+var NanoTimer = require('nanotimer')
+var ip = require('ip')
+var bodyParser = require('body-parser')
+var express = require('express')
+var multer = require('multer')
+var upload = multer({
+  dest: 'uploads/'
+})
 
 // Variables
-var expressResponse,
-  visualResponse,
-  timer = new NanoTimer()
+var visualResponse
+var timer = new NanoTimer()
 
 // INIT App
 var app = express()
@@ -63,8 +62,7 @@ app.post('/', upload.array(), function (req, res) {
 
   console.log('req.body: ', req.body)
 
-  if (!requestData.type || requestData.type == 'POST') {
-    // expressResponse = res
+  if (!requestData.type || requestData.type === 'POST') {
     EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
   } else {
     res.status(500).json({
@@ -109,8 +107,9 @@ var onProxySuccess = function (body, res) {
 var onProxyError = function (postData, fromQueue, res) {
   if (fromQueue) { // Failed again - keep in queue
     if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER)
-  } else
+  } else {
     Queue.writeFile(postData, res)
+  }
 }
 
 var onStartTimer = function () {

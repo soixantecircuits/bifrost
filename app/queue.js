@@ -1,9 +1,9 @@
 'use strict'
 
-var config = require('./config/config.json'),
-  EventDispatcher = require('./eventDispatcher'),
-  fs = require('graceful-fs'),
-  fsExtra = require('fs-extra')
+var config = require('./config/config.json')
+var EventDispatcher = require('./eventDispatcher')
+var fs = require('graceful-fs')
+var fsExtra = require('fs-extra')
 
 var Queue = function () {
   var writeFile = function (postData, res) {
@@ -35,19 +35,16 @@ var Queue = function () {
       }
 
       // Filter to remove unwanted files
-      files = files.filter(function (a) { return a.match(/\.txt$/); })
+      files = files.filter(function (a) { return a.match(/\.txt$/) })
       console.log('Handle Queue - ', files.length)
 
-      if (files.length == 0) {
+      if (files.length === 0) {
         console.log('Clear timer and delete folder')
-
         deleteFolder()
         EventDispatcher.emit(EventDispatcher.CLEAR_TIMER)
-
       } else {
         if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER)
       }
-
       // Retry post
       readQueuedFiles(files)
     })

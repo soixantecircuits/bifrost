@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "newman -c ./test/bifrost.json -n 2000"
+    "test": "newman -c ./test/bifrost.json -n 2000",
+    "iso": "standard"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,8 @@
     "request": "~2.65.0"
   },
   "devDependencies": {
-    "newman": "^1.2.23"
+    "newman": "^1.2.23",
+    "standard": "^3.0.0"
   }
 }
+
