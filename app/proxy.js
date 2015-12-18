@@ -24,7 +24,7 @@ var Proxy = function () {
 
     // DEV MODE
     if (config.dev.mode) {
-      var url = 'http://coca-bercy.bonhommestudio.com/api/gif/'
+      var url = config.dev.url
 
       fs.readFile('./test/request.txt', 'utf-8', function (err, data) {
         if (err) throw err

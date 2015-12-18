@@ -12,6 +12,7 @@
     "queue" : "./app/queue"
   },
   "dev" : {
-    "mode" : false
+    "mode" : false,
+    "url": "http://xxx/api"
   }
 }
