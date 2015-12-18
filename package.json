@@ -33,8 +33,8 @@
     "request": "~2.65.0"
   },
   "devDependencies": {
+    "minigun": "^1.2.14",
     "newman": "^1.2.23",
     "standard": "^3.0.0"
   }
 }
-

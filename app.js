@@ -60,9 +60,8 @@ app.get('/alive', function (req, res) {
 app.post('/', upload.array(), function (req, res) {
   var requestData = req.body
 
-  console.log('req.body: ', req.body)
-
   if (!requestData.type || requestData.type === 'POST') {
+
     EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
   } else {
     res.status(500).json({
@@ -106,7 +105,9 @@ var onProxySuccess = function (body, res) {
 
 var onProxyError = function (postData, fromQueue, res) {
   if (fromQueue) { // Failed again - keep in queue
-    if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER)
+    if (config.proxy.autostart){
+      EventDispatcher.emit(EventDispatcher.START_TIMER)
+    }
   } else {
     Queue.writeFile(postData, res)
   }

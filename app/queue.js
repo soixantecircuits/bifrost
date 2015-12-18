@@ -7,8 +7,11 @@ var fsExtra = require('fs-extra')
 
 var Queue = function () {
   var writeFile = function (postData, res) {
+    postData.timeStamp = postData.timeStamp || Date.now()
     fsExtra.ensureDir(config.path.queue, function (err) {
-      if (err) throw err
+      if (err) {
+         console.log(err);
+      }
       writeQueuedFile(postData, res)
     })
   }
@@ -21,7 +24,9 @@ var Queue = function () {
       // throw err
       }
 
-      if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER)
+      if (config.proxy.autostart){
+        EventDispatcher.emit(EventDispatcher.START_TIMER)
+      }
       EventDispatcher.emit(EventDispatcher.FILE_QUEUED, res)
     })
   }
