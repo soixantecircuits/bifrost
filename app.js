@@ -109,7 +109,7 @@ var onProxyError = function (postData, fromQueue, res) {
       EventDispatcher.emit(EventDispatcher.START_TIMER)
     }
   } else {
-    Queue.writeFile(postData, res)
+    Queue.saveRequest(postData, res)
   }
 }
 
@@ -128,18 +128,18 @@ var clearTimer = function () {
   }
 }
 
-var onFileQueued = function (res) {
+var onRequestQueued = function (res) {
   res.status(200).json({
     'proxy': 'saved'
   })
 }
-var onFileError = function (res) {
+var onSavingError = function (res) {
   res.status(500).json({
     'error': 'not able to save the request'
   })
 }
-var onFileDelete = function (timestamp) {
-  Queue.deleteFile(timestamp)
+var onRequestRemove = function (timestamp) {
+  Queue.removeRequest(timestamp)
 }
 
 // Start server
@@ -148,9 +148,9 @@ var server = app.listen(config.server.port, function () {
   EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess)
   EventDispatcher.on(EventDispatcher.PROXY_POST_ERROR, onProxyError)
 
-  EventDispatcher.on(EventDispatcher.FILE_QUEUED, onFileQueued)
-  EventDispatcher.on(EventDispatcher.FILE_ERROR, onFileError)
-  EventDispatcher.on(EventDispatcher.DELETE_FROM_QUEUE, onFileDelete)
+  EventDispatcher.on(EventDispatcher.REQUEST_QUEUED, onRequestQueued)
+  EventDispatcher.on(EventDispatcher.SAVING_ERROR, onSavingError)
+  EventDispatcher.on(EventDispatcher.DELETE_FROM_QUEUE, onRequestRemove)
 
   EventDispatcher.on(EventDispatcher.START_TIMER, onStartTimer)
   EventDispatcher.on(EventDispatcher.CLEAR_TIMER, onClearTimer)
