@@ -4,7 +4,7 @@
   "description": "A cache gateway for posting in the past",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node $NODE_DEBUG_OPTION app.js",
     "test": "newman -c ./test/bifrost.json -n 2000",
     "iso": "standard"
   },
@@ -30,6 +30,7 @@
     "lodash": "^3.10.1",
     "multer": "^1.1.0",
     "nanotimer": "0.3.13",
+    "nedb": "^1.8.0",
     "request": "~2.65.0"
   },
   "devDependencies": {
