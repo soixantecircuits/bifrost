@@ -10,16 +10,18 @@ var _ = require('lodash')
 var Proxy = function () {
   var post = function (postData, fromQueue, res) {
     if (fromQueue) {
-      console.log('post from proxy - queue')
+      console.log('proxy.js - post from proxy - queue')
     } else {
-      console.log('post from Proxy')
+      console.log('proxy.js - post from proxy')
+    }
+
+    if (!postData) {
+      console.error('proxy.js - no postdata')
+      return
     }
 
     var url = postData.url || config.proxy.url
-    var date = new Date()
-    var timestamp = date.getTime()
-
-    if (!postData.timestamp) postData.timestamp = timestamp
+    postData.timestamp = postData.timestamp || new Date().getTime()
 
     if (config.dev.mode) {
       // DEV MODE
@@ -60,15 +62,15 @@ var Proxy = function () {
       if (!error && response && response.statusCode === 200) {
         // retry from queue succeeded - delete file in queue
         if (fromQueue) {
-          console.log('success + deleted')
+          console.log('proxy.js - success + deleted')
           EventDispatcher.emit(EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp)
         } else {
-          console.log('success')
-          console.log('request respond ');
+          console.log('proxy.js - success')
+          console.log('proxy.js - request respond ');
           EventDispatcher.emit(EventDispatcher.PROXY_POST_SUCCESS, body, res)
         }
       } else {
-        console.log('fail - but saved')
+        console.log('proxy.js - fail - but saved')
         EventDispatcher.emit(EventDispatcher.PROXY_POST_ERROR, postData, fromQueue, res)
       }
     })
