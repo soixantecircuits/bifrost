@@ -10,6 +10,7 @@ var NanoTimer = require('nanotimer')
 var ip = require('ip')
 var bodyParser = require('body-parser')
 var express = require('express')
+var mdns = require('mdns')
 var multer = require('multer')
 var upload = multer({
   dest: 'uploads/'
@@ -142,6 +143,16 @@ var onRequestRemove = function (timestamp) {
   Queue.removeRequest(timestamp)
 }
 
+function handleError (error) {
+  switch (error.errorCode) {
+    case mdns.kDNSServiceErr_Unknown:
+      console.warn(error)
+      break
+    default:
+      throw error
+  }
+}
+
 // Start server
 var server = app.listen(config.server.port, function () {
   EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost)
@@ -168,6 +179,16 @@ var server = app.listen(config.server.port, function () {
   console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version,
     ip.address(), port)
 
+  try {
+    var ad = mdns.createAdvertisement(mdns.tcp('bifrost'), port)
+    ad.on('error', handleError)
+    ad.start()
+  } catch (ex) {
+    handleError(ex)
+  }
+
   // On script launch handle queue
   Queue.handle()
 })
+
+
