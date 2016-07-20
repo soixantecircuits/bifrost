@@ -21,26 +21,34 @@ var Proxy = function () {
     }
 
     var url = postData.url || config.proxy.url
-    postData.timestamp = postData.timestamp || new Date().getTime()
+    
+    if (!postData.timestamp)
+      postData.timestamp = new Date().getTime()
 
     if (config.dev.mode) {
       // DEV MODE
-      var devURL = config.dev.url
+      // var devURL = config.dev.url
+      var devURL = url
 
-      fs.readFile('./test/request.txt', 'utf-8', function (err, data) {
-        if (err) throw err
+      // fs.readFile('./test/request.txt', 'utf-8', function (err, data) {
+      //   if (err) throw err
 
-        postData = {}
-        postData.url = devURL
-        postData.type = 'POST'
-        try {
-          postData.data = JSON.parse(data).data
-        } catch (error) {
-          console.error("proxy.js - parse error", error)
-        }
+        // postData = {}
+        // postData.url = devURL
+        // postData.type = 'POST'
+
+      postData.url = url
+      postData.type = 'POST'
+      postData.reason = 'dev'
+      
+        // try {
+        //   postData.data = JSON.parse(data).data
+        // } catch (error) {
+        //   console.error("proxy.js - parse error", error)
+        // }
         
         launchRequest(devURL, postData, fromQueue, res)
-      })
+      // })
     } else {
       // PROD MODE
       postData.url = url
@@ -75,7 +83,7 @@ var Proxy = function () {
         }
       } else {
         console.log('proxy.js - fail - but saved')
-        EventDispatcher.emit(EventDispatcher.PROXY_POST_ERROR, postData, fromQueue, res)
+        EventDispatcher.emit(EventDispatcher.PROXY_POST_ERROR, postData, fromQueue, response, res)
       }
     })
   }

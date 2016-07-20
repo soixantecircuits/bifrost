@@ -12,7 +12,7 @@ db.loadDatabase()
 var Queue = function () {
   var saveRequest = function (postData, res) {
     postData.timeStamp = postData.timeStamp || Date.now()
-    db.insert({timestamp: postData.timestamp, reason: postData.reason, data: postData.data}, function (err, newDoc) {
+    db.insert({timestamp: postData.timestamp, postData: postData}, function (err, newDoc) {
       if (err) {
         EventDispatcher.emit(EventDispatcher.SAVING_ERROR, res)
       }
@@ -51,7 +51,7 @@ var Queue = function () {
           if (err)
               throw err
         });
-        EventDispatcher.emit(EventDispatcher.PROXY_POST, request.data, true)
+        EventDispatcher.emit(EventDispatcher.PROXY_POST, request.postData, true)
       })
     });
   }
@@ -61,10 +61,19 @@ var Queue = function () {
       if (err) throw err
     })
   }
+  
+  var totalCount = function () {
+    db.count({}, function (err, count) {
+      if (err)
+          throw err
+        return count
+    })
+  }
 
   return {
     saveRequest: saveRequest,
     removeRequest: removeRequest,
+    totalCount: totalCount,
     handle: handle
   }
 }

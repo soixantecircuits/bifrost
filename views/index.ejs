@@ -11,17 +11,27 @@
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
 	</head>
 	<body>
-
 		<div class="wrapper">
+			<div>
+				<h1>Welcome to Bifrost,</h1>
 
-			<h1>Welcome to Bifrost,</h1>
+				<p>
+					Number of files queued : <%= lengthQueue %>
+				</p>
 
-			<p>
-				Number of files queued : <%= lengthQueue %>
-			</p>
-
-			<a href="#" class="btn btn-action">Force retry queue</a>
-			<a href="#" class="btn btn-action">Clear queue</a>
+				<a href="#" class="btn btn-action">Force retry queue</a>
+				<a href="#" class="btn btn-action">Clear queue</a>
+			</div>
+			<div>
+				<h1>Pending requests: </h1>
+				<% if (pendingQueue.length) { %>
+				<ul>
+					<% pendingQueue.forEach(function (request) { %>
+					<li><%= request.url %> reason: <%= request.reason %> failed because: <%= request.status %></li>
+					<% }) %>
+				</ul>
+				<% } %>
+			</div>
 		</div>
 		
 		<script type="text/javascript" src="/js/main.js"></script>

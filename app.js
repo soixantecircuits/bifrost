@@ -1,4 +1,3 @@
-// Require
 var Proxy = require('./app/proxy')
 var Queue = require('./app/queue')
 var EventDispatcher = require('./app/eventDispatcher')
@@ -16,13 +15,13 @@ var upload = multer({
   dest: 'uploads/'
 })
 
-// Variables
 var visualResponse
+var pendingRequests = []
 var timer = new NanoTimer()
 
 var app = express()
 
-// Settings - bodyparser
+// bodyparser settings
 var bodyparserLimit = '100mb'
 
 app.use(bodyParser.json({
@@ -34,7 +33,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }))
 
-// Settings - Front view
 app.use(express.static('public'))
 app.set('view engine', 'ejs')
 
@@ -46,10 +44,9 @@ app.use(function (req, res, next) {
   next()
 })
 
-// Routes
 app.get('/', function (req, res) {
   visualResponse = res
-  displayQueueLength()
+  displayPageInfo()
 })
 
 app.get('/alive', function (req, res) {
@@ -58,7 +55,6 @@ app.get('/alive', function (req, res) {
   })
 })
 
-// app.post('/', upload.array(), function ( req, res ) {
 app.post('/', upload.array(), function (req, res) {
   var requestData = req.body
 
@@ -71,31 +67,14 @@ app.post('/', upload.array(), function (req, res) {
   }
 })
 
-// display Queue Length
-var displayQueueLength = function () {
-  var lengthQueue = 0
-  fs.readdir(config.path.queue, function (err, files) {
-    if (err) {
-      lengthQueue = 0
-      visualResponse.render('index', {
-        lengthQueue: lengthQueue
-      })
-      return
-    }
-
-    // Filter to remove unwanted files
-    files = files.filter(function (a) {
-      return a.match(/\.txt$/)
-    })
-    lengthQueue = files.length
-
-    visualResponse.render('index', {
-      lengthQueue: lengthQueue
-    })
+var displayPageInfo = function () {
+  visualResponse.render('index', {
+    lengthQueue: Queue.totalCount(),
+    pendingQueue: pendingRequests
   })
 }
 
-// Handle events
+// Event handlers
 var onProxyPost = function (body, fromQueue, res) {
   Proxy.post(body, fromQueue, res)
 }
@@ -104,7 +83,10 @@ var onProxySuccess = function (body, res) {
   res.status(200).json(body)
 }
 
-var onProxyError = function (postData, fromQueue, res) {
+var onProxyError = function (postData, fromQueue, response, res) {
+  pendingRequests.push({url: postData.url,
+                        reason: postData.reason,
+                        status: response.statusCode})
   if (fromQueue) { // Failed again - keep in queue
     if (config.proxy.autostart){
       EventDispatcher.emit(EventDispatcher.START_TIMER)
@@ -134,11 +116,13 @@ var onRequestQueued = function (res) {
     'proxy': 'saved'
   })
 }
+
 var onSavingError = function (res) {
   res.status(500).json({
     'error': 'not able to save the request'
   })
 }
+
 var onRequestRemove = function (timestamp) {
   Queue.removeRequest(timestamp)
 }
@@ -153,7 +137,6 @@ function handleError (error) {
   }
 }
 
-// Start server
 var server = app.listen(config.server.port, function () {
   EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost)
   EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess)
@@ -187,7 +170,6 @@ var server = app.listen(config.server.port, function () {
     handleError(ex)
   }
 
-  // On script launch handle queue
   Queue.handle()
 })
 
