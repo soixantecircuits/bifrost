@@ -19,14 +19,15 @@ var upload = multer({
 var visualResponse
 var timer = new NanoTimer()
 
-// INIT App
 var app = express()
 
 // Settings - bodyparser
 var bodyparserLimit = '100mb'
+
 app.use(bodyParser.json({
   limit: bodyparserLimit
 }))
+
 app.use(bodyParser.urlencoded({
   limit: bodyparserLimit,
   extended: true
@@ -61,7 +62,6 @@ app.post('/', upload.array(), function (req, res) {
   var requestData = req.body
 
   if (!requestData.type || requestData.type === 'POST') {
-
     EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
   } else {
     res.status(500).json({

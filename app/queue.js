@@ -2,10 +2,8 @@
 
 var config = require('./config/config.json')
 var EventDispatcher = require('./eventDispatcher')
-var fs = require('graceful-fs')
-var fsExtra = require('fs-extra')
 var Datastore = require('nedb')
-var db = new Datastore({filename : 'requests'})
+var db = new Datastore({filename : './queue/requests'})
 
 db.loadDatabase()
 
