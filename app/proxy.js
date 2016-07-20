@@ -33,8 +33,12 @@ var Proxy = function () {
         postData = {}
         postData.url = devURL
         postData.type = 'POST'
-        postData.data = JSON.parse(data).data
-
+        try {
+          postData.data = JSON.parse(data).data
+        } catch (error) {
+          console.error("proxy.js - parse error", error)
+        }
+        
         launchRequest(devURL, postData, fromQueue, res)
       })
     } else {
