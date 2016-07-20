@@ -2,6 +2,8 @@
 
 var config = require('./config/config.json')
 var EventDispatcher = require('./eventDispatcher')
+
+var queue = require('async').queue
 var Datastore = require('nedb')
 var db = new Datastore({filename : './queue/requests'})
 
@@ -35,14 +37,23 @@ var Queue = function () {
         console.log('queue.js - clear timer')
         EventDispatcher.emit(EventDispatcher.CLEAR_TIMER)
       }
-      sendRequests(requests)
-    });
-  }
 
-  var sendRequests = function (requests) {
-    requests.forEach(function (request) {
-      EventDispatcher.emit(EventDispatcher.PROXY_POST, request.data, true)
-    })
+      var requestQueue = queue( function (task, callback) {
+        callback()
+      }, 5)
+
+      requestQueue.drain = function () {
+        console.log('all requests have been processed')
+      }
+
+      requests.forEach(function (request) {
+        requestQueue.push(request, function (err) {
+          if (err)
+              throw err
+        });
+        EventDispatcher.emit(EventDispatcher.PROXY_POST, request.data, true)
+      })
+    });
   }
 
   var removeRequest = function (timestamp) {

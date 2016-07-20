@@ -21,6 +21,7 @@
   "author": "Soixante circuits",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.0.0",
     "body-parser": "~1.14.1",
     "ejs": "^2.3.4",
     "express": "~4.13.3",
