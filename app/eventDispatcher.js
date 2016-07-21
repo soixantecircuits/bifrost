@@ -19,4 +19,5 @@ var EventDispatcher = function () {
 }
 
 util.inherits(EventDispatcher, EventEmitter)
+
 module.exports = new EventDispatcher()

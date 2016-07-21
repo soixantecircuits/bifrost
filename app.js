@@ -68,9 +68,13 @@ app.post('/', upload.array(), function (req, res) {
 })
 
 var displayPageInfo = function () {
-  visualResponse.render('index', {
-    lengthQueue: Queue.totalCount(),
-    pendingQueue: pendingRequests
+  Queue.totalCount().then(function result (count) {
+    visualResponse.render('index', {
+      lengthQueue: count,
+      pendingQueue: pendingRequests
+    })
+  }, function error (err) {
+    console.error(err.message)
   })
 }
 
@@ -88,7 +92,7 @@ var onProxyError = function (postData, fromQueue, response, res) {
                         reason: postData.reason,
                         status: response.statusCode})
   if (fromQueue) { // Failed again - keep in queue
-    if (config.proxy.autostart){
+    if (config.proxy.autostart) {
       EventDispatcher.emit(EventDispatcher.START_TIMER)
     }
   } else {

@@ -15,15 +15,8 @@ var Proxy = function () {
       console.log('proxy.js - post from proxy')
     }
 
-    if (!postData) {
-      console.error('proxy.js - no postdata')
-      return
-    }
-
     var url = postData.url || config.proxy.url
-    
-    if (!postData.timestamp)
-      postData.timestamp = new Date().getTime()
+    postData.timestamp = postData.timestamp || new Date().getTime()
 
     if (config.dev.mode) {
       // DEV MODE
@@ -72,13 +65,12 @@ var Proxy = function () {
       form: postData.formData
     }, function (error, response, body) {
       if (!error && response && response.statusCode === 200) {
-        // retry from queue succeeded - delete file in queue
         if (fromQueue) {
           console.log('proxy.js - success + deleted')
           EventDispatcher.emit(EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp)
         } else {
           console.log('proxy.js - success')
-          console.log('proxy.js - request respond ');
+          console.log('proxy.js - request respond ')
           EventDispatcher.emit(EventDispatcher.PROXY_POST_SUCCESS, body, res)
         }
       } else {

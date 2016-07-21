@@ -16,7 +16,7 @@ var Queue = function () {
       if (err) {
         EventDispatcher.emit(EventDispatcher.SAVING_ERROR, res)
       }
-      if (config.proxy.autostart){
+      if (config.proxy.autostart) {
         EventDispatcher.emit(EventDispatcher.START_TIMER)
       }
       EventDispatcher.emit(EventDispatcher.REQUEST_QUEUED, res)
@@ -38,9 +38,9 @@ var Queue = function () {
         EventDispatcher.emit(EventDispatcher.CLEAR_TIMER)
       }
 
-      var requestQueue = queue( function (task, callback) {
+      var requestQueue = queue(function (task, callback) {
         callback()
-      }, 5)
+      }, 1)
 
       requestQueue.drain = function () {
         console.log('all requests have been processed')
@@ -50,23 +50,27 @@ var Queue = function () {
         requestQueue.push(request, function (err) {
           if (err)
               throw err
-        });
+        })
         EventDispatcher.emit(EventDispatcher.PROXY_POST, request.postData, true)
       })
-    });
+    })
   }
 
   var removeRequest = function (timestamp) {
     db.remove({timestamp: timestamp}, {}, function (err, numRemoved) {
-      if (err) throw err
+      if (err)
+        throw err
     })
   }
   
   var totalCount = function () {
-    db.count({}, function (err, count) {
-      if (err)
-          throw err
-        return count
+    return new Promise(function(resolve, reject) {
+      db.count({}, function (err, count) {
+        if (err)
+          reject(err)
+        else
+          resolve(count)
+      })
     })
   }
 
