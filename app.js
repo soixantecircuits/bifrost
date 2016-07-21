@@ -10,6 +10,7 @@ var ip = require('ip')
 var bodyParser = require('body-parser')
 var express = require('express')
 var mdns = require('mdns')
+var _ = require('lodash')
 var multer = require('multer')
 var upload = multer({
   dest: 'uploads/'
@@ -55,8 +56,14 @@ app.get('/alive', function (req, res) {
   })
 })
 
-app.post('/', upload.array(), function (req, res) {
+app.post('/', upload.any(), function (req, res) {
   var requestData = req.body
+  
+  requestData.files = []
+
+  _.forEach(req.files, function (file) {
+    requestData.files.push(file.path)
+  })
 
   if (!requestData.type || requestData.type === 'POST') {
     EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
