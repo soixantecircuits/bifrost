@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node $NODE_DEBUG_OPTION app.js",
-    "test": "newman -c ./test/bifrost.json -n 2000",
+    "test": "./node_modules/.bin/newman -c ./test/bifrost.json -n 2000",
     "iso": "standard"
   },
   "repository": {
@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "minigun": "^1.2.14",
-    "newman": "^1.2.23",
+    "newman": "2.1.2",
     "standard": "^3.0.0"
   }
 }
