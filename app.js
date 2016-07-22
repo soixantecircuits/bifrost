@@ -22,26 +22,24 @@ var timer = new NanoTimer()
 
 var app = express()
 
-// bodyparser settings
-var bodyparserLimit = '100mb'
-
 app.use(bodyParser.json({
-  limit: bodyparserLimit
+  limit: config.proxy.bodyparserlimit
 }))
 
 app.use(bodyParser.urlencoded({
-  limit: bodyparserLimit,
+  limit: config.proxy.bodyparserlimit,
   extended: true
 }))
 
 app.use(express.static('public'))
+app.set('views', __dirname + '/public/views')
 app.set('view engine', 'ejs')
 
 // Allow cross domain requests
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept')
+      'Origin, X-Requested-With, Content-Type, Accept')
   next()
 })
 
@@ -58,7 +56,7 @@ app.get('/alive', function (req, res) {
 
 app.post('/', upload.any(), function (req, res) {
   var requestData = req.body
-  
+
   requestData.files = []
 
   _.forEach(req.files, function (file) {
@@ -95,9 +93,12 @@ var onProxySuccess = function (body, res) {
 }
 
 var onProxyError = function (postData, fromQueue, response, res) {
+  if (!response)
+    return
+
   pendingRequests.push({url: postData.url,
-                        reason: postData.reason,
-                        status: response.statusCode})
+    reason: postData.reason,
+    status: response.statusCode})
   if (fromQueue) { // Failed again - keep in queue
     if (config.proxy.autostart) {
       EventDispatcher.emit(EventDispatcher.START_TIMER)
@@ -171,7 +172,7 @@ var server = app.listen(config.server.port, function () {
   console.log('                                ')
   console.log('                                ')
   console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version,
-    ip.address(), port)
+      ip.address(), port)
 
   try {
     var ad = mdns.createAdvertisement(mdns.tcp('bifrost'), port)
@@ -183,5 +184,3 @@ var server = app.listen(config.server.port, function () {
 
   Queue.handle()
 })
-
-

@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node $NODE_DEBUG_OPTION app.js",
+    "test-server": "node ./test/server.js",
     "test": "./node_modules/.bin/newman -c ./test/bifrost.json -n 2000",
     "iso": "standard"
   },
@@ -28,6 +29,7 @@
     "fs-extra": "~0.24.0",
     "graceful-fs": "~4.1.2",
     "ip": "~1.0.1",
+    "list.js": "^1.2.0",
     "lodash": "^3.10.1",
     "mdns": "^2.3.3",
     "multer": "^1.1.0",

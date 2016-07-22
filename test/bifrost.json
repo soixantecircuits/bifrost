@@ -14,7 +14,7 @@
 		{
 			"id": "8e6cdc24-96a6-5be4-fd6a-f8d3e2611022",
 			"headers": "",
-			"url": "http://localhost:3008/",
+			"url": "http://localhost:3002/",
 			"pathVariables": {},
 			"preRequestScript": "",
 			"method": "POST",
