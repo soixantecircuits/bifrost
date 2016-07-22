@@ -5,6 +5,7 @@ var pjson = require('./package.json')
 var config = require('./app/config/config.json')
 
 var fs = require('graceful-fs')
+var moment = require('moment')
 var NanoTimer = require('nanotimer')
 var ip = require('ip')
 var bodyParser = require('body-parser')
@@ -21,6 +22,7 @@ var pendingRequests = []
 var timer = new NanoTimer()
 
 var app = express()
+app.locals.moment = moment
 
 app.use(bodyParser.json({
   limit: config.proxy.bodyparserlimit
@@ -64,6 +66,7 @@ app.post('/', upload.any(), function (req, res) {
   })
 
   if (!requestData.type || requestData.type === 'POST') {
+    requestData.origin = req.headers.origin
     EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
   } else {
     res.status(500).json({
@@ -96,7 +99,8 @@ var onProxyError = function (postData, fromQueue, response, res) {
   if (!response)
     return
 
-  pendingRequests.push({url: postData.url,
+  pendingRequests.push({origin: postData.origin,
+    timestamp: postData.timeStamp,
     reason: postData.reason,
     status: response.statusCode})
   if (fromQueue) { // Failed again - keep in queue

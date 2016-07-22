@@ -27,13 +27,15 @@
 				<table>
 					<tbody class="list">
 						<tr>
-							<td class="url">Request url:</td>
+							<td class="url">Origin url:</td>
+							<td class="timestamp">Time of posting:</td>
 							<td class="reason">Reason of posting:</td>
 							<td class="status">Status of request:</td>
 						</tr>
 						<% pendingQueue.forEach(function (request) { %>
 							<tr>
-								<td class="url"><%= request.url %></td>
+								<td class="url"><%= request.origin %></td>
+								<td class="timestamp"><%= moment(request.timestamp).format('DD/MM/YYYY HH:mm:ss') %></td>
 								<td class="reason"><%= request.reason %></td>
 								<td class="status"><%= request.status %></td>
 							</tr>

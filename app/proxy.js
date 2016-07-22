@@ -16,7 +16,7 @@ var Proxy = function () {
     }
 
     var url = postData.url || config.proxy.url
-    postData.timestamp = postData.timestamp || new Date().getTime()
+    postData.timeStamp = postData.timeStamp || new Date().getTime()
 
     if (config.dev.mode) {
       // DEV MODE
