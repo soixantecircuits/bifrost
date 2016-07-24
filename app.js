@@ -96,13 +96,14 @@ var onProxySuccess = function (body, res) {
 }
 
 var onProxyError = function (postData, fromQueue, response, res) {
-  if (!response)
-    return
 
-  pendingRequests.push({origin: postData.origin,
+  pendingRequests.push({
+    origin: postData.origin,
     timestamp: postData.timeStamp,
     reason: postData.reason,
-    status: response.statusCode})
+    status: response ? response.statusCode : 'server not found'
+  })
+  
   if (fromQueue) { // Failed again - keep in queue
     if (config.proxy.autostart) {
       EventDispatcher.emit(EventDispatcher.START_TIMER)
