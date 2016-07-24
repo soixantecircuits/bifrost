@@ -9,8 +9,8 @@
     "autostart" : true
   },
   "lookup": ["example"],
-  "path" : {
-    "queue" : "./app/queue"
+  "queue" : {
+    "path" : "./queue/requests"
   },
   "dev" : {
     "mode" : false,

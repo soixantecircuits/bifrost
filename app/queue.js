@@ -5,7 +5,7 @@ var EventDispatcher = require('./eventDispatcher')
 
 var queue = require('async').queue
 var Datastore = require('nedb')
-var db = new Datastore({filename : './queue/requests'})
+var db = new Datastore({filename: config.queue.path})
 
 db.loadDatabase()
 
