@@ -59,11 +59,12 @@ app.get('/alive', function (req, res) {
 app.post('/', upload.any(), function (req, res) {
   var requestData = req.body
 
-  requestData.files = []
-
-  _.forEach(req.files, function (file) {
-    requestData.files.push(file.path)
-  })
+  if (req.files) {
+    requestData.files = []
+    _.forEach(req.files, function (file) {
+      requestData.files.push(file.path)
+    })
+  }
 
   if (!requestData.type || requestData.type === 'POST') {
     requestData.origin = req.headers.origin

@@ -30,7 +30,7 @@ var Proxy = function () {
       // postData.type = 'POST'
 
       postData.url = url
-      postData.type = 'POST'
+      // postData.type = 'POST'
       postData.reason = 'dev'
       
       // try {
@@ -44,7 +44,7 @@ var Proxy = function () {
     } else {
       // PROD MODE
       postData.url = url
-      postData.type = 'POST'
+      // postData.type = 'POST'
 
       launchRequest(url, postData, fromQueue, res)
     }
@@ -54,8 +54,12 @@ var Proxy = function () {
   var launchRequest = function (url, postData, fromQueue, res) {
     console.log('proxy.js - launchRequest: ', url)
 
-    postData.formData = postData.formData || querystring.parse(postData.data) ||
-      _.omit(postData, 'url')
+    postData.formData = postData.formData || querystring.parse(postData.data)
+    
+    if (postData.files) {
+      postData.formData.files = postData.files
+    }
+    
     if (Object.keys(postData.formData).length < 1) {
       postData.formData = _.omit(postData, 'url')
     }
@@ -66,7 +70,7 @@ var Proxy = function () {
       if (!error && response && response.statusCode === 200) {
         if (fromQueue) {
           console.log('proxy.js - success + deleted')
-          EventDispatcher.emit(EventDispatcher.DELETE_FROM_QUEUE, postData.timestamp)
+          EventDispatcher.emit(EventDispatcher.DELETE_FROM_QUEUE, postData.timeStamp)
         } else {
           console.log('proxy.js - success')
           console.log('proxy.js - request respond ')

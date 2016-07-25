@@ -13,7 +13,7 @@ db.loadDatabase()
 var Queue = function () {
   var saveRequest = function (postData, res) {
     postData.timeStamp = postData.timeStamp || Date.now()
-    db.insert({timestamp: postData.timestamp, postData: postData}, function (err, newDoc) {
+    db.insert({timestamp: postData.timeStamp, postData: postData}, function (err, newDoc) {
       if (err) {
         EventDispatcher.emit(EventDispatcher.SAVING_ERROR, res)
       }

@@ -1,12 +1,12 @@
 {
-  "server" : {
-    "port" : 3002
+  "server": {
+    "port": 3002
   },
-  "proxy" : {
-    "url" : "http://xxx/api/post/",
-    "timeout" : "30s",
+  "proxy": {
+    "url": "http://xxx/api/post/",
+    "timeout": "30s",
     "bodyparserlimit": "100mb",
-    "autostart" : true
+    "autostart": true
   },
   "lookup": ["example"],
   "queue": {
@@ -16,8 +16,8 @@
   "uploads": {
     "path": "uploads"
   },
-  "dev" : {
-    "mode" : false,
+  "dev": {
+    "mode": false,
     "url": "http://xxx/api"
   }
 }
