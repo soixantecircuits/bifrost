@@ -4,8 +4,9 @@ var config = require('./config/config.json')
 var EventDispatcher = require('./eventDispatcher')
 
 var queue = require('async').queue
+var path = require('path')
 var Datastore = require('nedb')
-var db = new Datastore({filename: config.queue.path})
+var db = new Datastore({filename: path.join(__dirname, config.queue.path, config.queue.name)})
 
 db.loadDatabase()
 
@@ -31,8 +32,9 @@ var Queue = function () {
         return
       }
       if (requests.length) {
-        if (config.proxy.autostart)
+        if (config.proxy.autostart) {
           EventDispatcher.emit(EventDispatcher.START_TIMER)
+        }
       } else {
         console.log('queue.js - clear timer')
         EventDispatcher.emit(EventDispatcher.CLEAR_TIMER)
@@ -48,8 +50,9 @@ var Queue = function () {
 
       requests.forEach(function (request) {
         requestQueue.push(request, function (err) {
-          if (err)
-              throw err
+          if (err) {
+            throw err
+          }
         })
         EventDispatcher.emit(EventDispatcher.PROXY_POST, request.postData, true)
       })
@@ -58,18 +61,20 @@ var Queue = function () {
 
   var removeRequest = function (timestamp) {
     db.remove({timestamp: timestamp}, {}, function (err, numRemoved) {
-      if (err)
+      if (err) {
         throw err
+      }
     })
   }
   
   var totalCount = function () {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       db.count({}, function (err, count) {
-        if (err)
+        if (err) {
           reject(err)
-        else
+        } else {
           resolve(count)
+        }
       })
     })
   }

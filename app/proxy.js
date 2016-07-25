@@ -4,7 +4,6 @@ var config = require('./config/config.json')
 var EventDispatcher = require('./eventDispatcher')
 var request = require('request')
 var querystring = require('querystring')
-var fs = require('graceful-fs')
 var _ = require('lodash')
 
 var Proxy = function () {
@@ -26,22 +25,22 @@ var Proxy = function () {
       // fs.readFile('./test/request.txt', 'utf-8', function (err, data) {
       //   if (err) throw err
 
-        // postData = {}
-        // postData.url = devURL
-        // postData.type = 'POST'
+      // postData = {}
+      // postData.url = devURL
+      // postData.type = 'POST'
 
       postData.url = url
       postData.type = 'POST'
       postData.reason = 'dev'
       
-        // try {
-        //   postData.data = JSON.parse(data).data
-        // } catch (error) {
-        //   console.error("proxy.js - parse error", error)
-        // }
+      // try {
+      //   postData.data = JSON.parse(data).data
+      // } catch (error) {
+      //   console.error("proxy.js - parse error", error)
+      // }
         
-        launchRequest(devURL, postData, fromQueue, res)
-      // })
+      launchRequest(devURL, postData, fromQueue, res)
+    // })
     } else {
       // PROD MODE
       postData.url = url

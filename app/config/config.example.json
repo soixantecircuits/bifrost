@@ -9,8 +9,12 @@
     "autostart" : true
   },
   "lookup": ["example"],
-  "queue" : {
-    "path" : "./queue/requests"
+  "queue": {
+    "path": "../queue",
+    "name": "requests"
+  },
+  "uploads": {
+    "path": "uploads"
   },
   "dev" : {
     "mode" : false,

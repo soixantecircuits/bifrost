@@ -4,17 +4,17 @@ var EventDispatcher = require('./app/eventDispatcher')
 var pjson = require('./package.json')
 var config = require('./app/config/config.json')
 
-var fs = require('graceful-fs')
+var express = require('express')
+var bodyParser = require('body-parser')
+var ip = require('ip')
+var _ = require('lodash')
+var path = require('path')
+var mdns = require('mdns')
 var moment = require('moment')
 var NanoTimer = require('nanotimer')
-var ip = require('ip')
-var bodyParser = require('body-parser')
-var express = require('express')
-var mdns = require('mdns')
-var _ = require('lodash')
 var multer = require('multer')
 var upload = multer({
-  dest: 'uploads/'
+  dest: path.join(__dirname, config.uploads.path)
 })
 
 var visualResponse
@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.use(express.static('public'))
-app.set('views', __dirname + '/public/views')
+app.set('views', path.join(__dirname, '/public/views'))
 app.set('view engine', 'ejs')
 
 // Allow cross domain requests
@@ -103,8 +103,8 @@ var onProxyError = function (postData, fromQueue, response, res) {
     reason: postData.reason,
     status: response ? response.statusCode : 'server not found'
   })
-  
-  if (fromQueue) { // Failed again - keep in queue
+
+  if (fromQueue) {// Failed again - keep in queue
     if (config.proxy.autostart) {
       EventDispatcher.emit(EventDispatcher.START_TIMER)
     }
