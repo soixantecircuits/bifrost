@@ -21,10 +21,10 @@ app.get('*', function (req, res) {
 
 app.post('/file', upload.any(), function (req, res) {
   console.log('POST on /file')
-  if (req.body.files) {
+  if (req.files) {
     console.log('with files')
-    _.forEach(req.body.files, function (file) {
-      console.log(file)
+    _.forEach(req.files, function (file) {
+      console.log(file.originalname)
     })
   } else {
     console.log('with empty file field')

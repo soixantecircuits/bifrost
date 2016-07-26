@@ -62,7 +62,11 @@ app.post('/', upload.any(), function (req, res) {
   if (req.files) {
     requestData.files = []
     _.forEach(req.files, function (file) {
-      requestData.files.push(file.path)
+      requestData.files.push({
+          path: file.path,
+          fieldname: file.fieldname,
+          originalname: file.originalname
+      })
     })
   }
 

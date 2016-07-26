@@ -5,6 +5,7 @@ var EventDispatcher = require('./eventDispatcher')
 var request = require('request')
 var querystring = require('querystring')
 var _ = require('lodash')
+var fs = require('fs')
 
 var Proxy = function () {
   var post = function (postData, fromQueue, res) {
@@ -32,13 +33,13 @@ var Proxy = function () {
       postData.url = url
       // postData.type = 'POST'
       postData.reason = 'dev'
-      
+
       // try {
       //   postData.data = JSON.parse(data).data
       // } catch (error) {
       //   console.error("proxy.js - parse error", error)
       // }
-        
+
       launchRequest(devURL, postData, fromQueue, res)
     // })
     } else {
@@ -53,20 +54,20 @@ var Proxy = function () {
   // Perform proxy request
   var launchRequest = function (url, postData, fromQueue, res) {
     console.log('proxy.js - launchRequest: ', url)
-
+    
     postData.formData = postData.formData || querystring.parse(postData.data)
-    
-    if (postData.files) {
-      postData.formData.files = postData.files
-    }
-    
+
     if (Object.keys(postData.formData).length < 1) {
       postData.formData = _.omit(postData, 'url')
     }
 
-    request.post(url, {
-      form: postData.formData
-    }, function (error, response, body) {
+    var options = {}
+
+    if (!postData.files) {
+      options = { form: postData.formData }
+    }
+
+    var postReq = request.post(url, options, function (error, response, body) {
       if (!error && response && response.statusCode === 200) {
         if (fromQueue) {
           console.log('proxy.js - success + deleted')
@@ -81,6 +82,13 @@ var Proxy = function () {
         EventDispatcher.emit(EventDispatcher.PROXY_POST_ERROR, postData, fromQueue, response, res)
       }
     })
+    
+    if (postData.files) {
+      var form = postReq.form()
+      _.forEach(postData.files, function (file) {
+          form.append(file.fieldname, fs.createReadStream(file.path), {filename: file.originalname})
+      })
+    }
   }
 
   return {
