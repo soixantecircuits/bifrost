@@ -7,15 +7,12 @@ var mdns = require('mdns')
 
 var app = express()
 
-var browser = mdns.createBrowser(mdns.tcp('bifrost'))
-
-// if you having issues with mdns discovery, comment line above and uncomment lines below
-// var sequence = [
-//   mdns.rst.DNSServiceResolve(),
-//   'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({families:[4]}),
-//   mdns.rst.makeAddressesUnique()
-// ]
-// var browser = mdns.createBrowser(mdns.tcp('bifrost'), {resolverSequence: sequence})
+var sequence = [
+  mdns.rst.DNSServiceResolve(),
+  'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({families:[4]}),
+  mdns.rst.makeAddressesUnique()
+]
+var browser = mdns.createBrowser(mdns.tcp('bifrost'), {resolverSequence: sequence})
 
 var upload = multer({
   dest: path.join(__dirname, './uploads')
