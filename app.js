@@ -159,7 +159,7 @@ function handleError (error) {
   }
 }
 
-var server = app.listen(config.server.port, function () {
+var server = app.listen(config.proxy.port, function () {
   EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost)
   EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess)
   EventDispatcher.on(EventDispatcher.PROXY_POST_ERROR, onProxyError)

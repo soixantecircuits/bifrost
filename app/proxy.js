@@ -15,7 +15,7 @@ var Proxy = function () {
       console.log('proxy.js - post from proxy')
     }
 
-    var url = postData.url || config.proxy.url
+    var url = postData.url || config.server.url
     postData.timeStamp = postData.timeStamp || new Date().getTime()
 
     if (config.dev.mode) {
