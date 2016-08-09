@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node $NODE_DEBUG_OPTION app.js",
     "test-server": "node $NODE_DEBUG_OPTION ./test/server.js",
-    "test": "./node_modules/mocha/bin/mocha ./test/test.js",
+    "tests-requests": "node ./test/requests.js",
+    "tests-proxy": "./node_modules/mocha/bin/mocha ./test/test.js",
     "iso": "standard"
   },
   "repository": {
