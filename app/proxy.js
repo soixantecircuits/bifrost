@@ -15,37 +15,21 @@ var Proxy = function () {
       console.log('proxy.js - post from proxy')
     }
 
-    var url = postData.url || config.server.url
+    var url = postData.url || config.server.url + ':' + config.server.port
     postData.timeStamp = postData.timeStamp || new Date().getTime()
 
     if (config.dev.mode) {
       // DEV MODE
-      // var devURL = config.dev.url
-      var devURL = url
 
-      // fs.readFile('./test/request.txt', 'utf-8', function (err, data) {
-      //   if (err) throw err
-
-      // postData = {}
-      // postData.url = devURL
-      // postData.type = 'POST'
-
-      postData.url = url
-      // postData.type = 'POST'
+      postData = {}
+      postData.type = 'POST'
+      postData.url = config.dev.url
       postData.reason = 'dev'
 
-      // try {
-      //   postData.data = JSON.parse(data).data
-      // } catch (error) {
-      //   console.error("proxy.js - parse error", error)
-      // }
-
       launchRequest(devURL, postData, fromQueue, res)
-    // })
     } else {
       // PROD MODE
       postData.url = url
-      // postData.type = 'POST'
 
       launchRequest(url, postData, fromQueue, res)
     }
@@ -63,10 +47,10 @@ var Proxy = function () {
 
     var options = {}
 
-    if (!postData.files) {
+    if (!postData.files || postData.files && !postData.files.length) {
       options = { form: postData.formData }
     }
-
+    
     var postReq = request.post(url, options, function (error, response, body) {
       if (!error && response && response.statusCode === 200) {
         if (fromQueue) {
@@ -83,7 +67,7 @@ var Proxy = function () {
       }
     })
     
-    if (postData.files) {
+    if (postData.files && postData.files.length) {
       var form = postReq.form()
       _.forEach(postData.files, function (file) {
           form.append(file.fieldname, fs.createReadStream(file.path), {filename: file.originalname})
