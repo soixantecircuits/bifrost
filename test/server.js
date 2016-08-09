@@ -5,6 +5,8 @@ var path = require('path')
 var multer = require('multer')
 var mdns = require('mdns')
 
+var config = require('../app/config/config.json')
+
 var app = express()
 
 var sequence = [
@@ -89,7 +91,7 @@ app.post('/test', function (req, res) {
   res.status(200).send('ok')
 })
 
-app.listen(5656, function () {
+app.listen(config.server.port, function () {
   try {
     browser.start()
   } catch (err) {

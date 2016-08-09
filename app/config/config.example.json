@@ -1,9 +1,11 @@
 {
   "server": {
-    "port": 3002
+    "url": "http://remote-server-address",
+    "port": 5656
   },
   "proxy": {
-    "url": "http://xxx/api/post/",
+    "url": "http://proxy-server-address",
+    "port": 3002,
     "timeout": "30s",
     "bodyparserlimit": "100mb",
     "autostart": true
