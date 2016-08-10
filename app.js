@@ -1,53 +1,53 @@
-// Require
 var Proxy = require('./app/proxy')
 var Queue = require('./app/queue')
 var EventDispatcher = require('./app/eventDispatcher')
 var pjson = require('./package.json')
 var config = require('./app/config/config.json')
 
-var fs = require('graceful-fs')
-var NanoTimer = require('nanotimer')
-var ip = require('ip')
-var bodyParser = require('body-parser')
 var express = require('express')
+var bodyParser = require('body-parser')
+var ip = require('ip')
+var _ = require('lodash')
+var path = require('path')
+var mdns = require('mdns')
+var moment = require('moment')
+var NanoTimer = require('nanotimer')
 var multer = require('multer')
 var upload = multer({
-  dest: 'uploads/'
+  dest: path.join(__dirname, config.uploads.path)
 })
 
-// Variables
 var visualResponse
+var pendingRequests = []
 var timer = new NanoTimer()
 
-// INIT App
 var app = express()
+app.locals.moment = moment
 
-// Settings - bodyparser
-var bodyparserLimit = '100mb'
 app.use(bodyParser.json({
-  limit: bodyparserLimit
+  limit: config.proxy.bodyparserlimit
 }))
+
 app.use(bodyParser.urlencoded({
-  limit: bodyparserLimit,
+  limit: config.proxy.bodyparserlimit,
   extended: true
 }))
 
-// Settings - Front view
 app.use(express.static('public'))
+app.set('views', path.join(__dirname, '/public/views'))
 app.set('view engine', 'ejs')
 
 // Allow cross domain requests
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept')
+      'Origin, X-Requested-With, Content-Type, Accept')
   next()
 })
 
-// Routes
 app.get('/', function (req, res) {
   visualResponse = res
-  displayQueueLength()
+  displayPageInfo()
 })
 
 app.get('/alive', function (req, res) {
@@ -56,12 +56,22 @@ app.get('/alive', function (req, res) {
   })
 })
 
-// app.post('/', upload.array(), function ( req, res ) {
-app.post('/', upload.array(), function (req, res) {
+app.post('/', upload.any(), function (req, res) {
   var requestData = req.body
 
-  if (!requestData.type || requestData.type === 'POST') {
+  if (req.files) {
+    requestData.files = []
+    _.forEach(req.files, function (file) {
+      requestData.files.push({
+          path: file.path,
+          fieldname: file.fieldname,
+          originalname: file.originalname
+      })
+    })
+  }
 
+  if (!requestData.type || requestData.type === 'POST') {
+    requestData.origin = req.headers.origin
     EventDispatcher.emit(EventDispatcher.PROXY_POST, requestData, false, res)
   } else {
     res.status(500).json({
@@ -70,31 +80,18 @@ app.post('/', upload.array(), function (req, res) {
   }
 })
 
-// display Queue Length
-var displayQueueLength = function () {
-  var lengthQueue = 0
-  fs.readdir(config.path.queue, function (err, files) {
-    if (err) {
-      lengthQueue = 0
-      visualResponse.render('index', {
-        lengthQueue: lengthQueue
-      })
-      return
-    }
-
-    // Filter to remove unwanted files
-    files = files.filter(function (a) {
-      return a.match(/\.txt$/)
-    })
-    lengthQueue = files.length
-
+var displayPageInfo = function () {
+  Queue.totalCount().then(function result (count) {
     visualResponse.render('index', {
-      lengthQueue: lengthQueue
+      lengthQueue: count,
+      pendingQueue: pendingRequests
     })
+  }, function error (err) {
+    console.error(err.message)
   })
 }
 
-// Handle events
+// Event handlers
 var onProxyPost = function (body, fromQueue, res) {
   Proxy.post(body, fromQueue, res)
 }
@@ -103,13 +100,21 @@ var onProxySuccess = function (body, res) {
   res.status(200).json(body)
 }
 
-var onProxyError = function (postData, fromQueue, res) {
-  if (fromQueue) { // Failed again - keep in queue
-    if (config.proxy.autostart){
+var onProxyError = function (postData, fromQueue, response, res) {
+
+  pendingRequests.push({
+    origin: postData.origin,
+    timestamp: postData.timeStamp,
+    reason: postData.reason,
+    status: response ? response.statusCode : 'server not found'
+  })
+
+  if (fromQueue) {// Failed again - keep in queue
+    if (config.proxy.autostart) {
       EventDispatcher.emit(EventDispatcher.START_TIMER)
     }
   } else {
-    Queue.writeFile(postData, res)
+    Queue.saveRequest(postData, res)
   }
 }
 
@@ -128,29 +133,40 @@ var clearTimer = function () {
   }
 }
 
-var onFileQueued = function (res) {
+var onRequestQueued = function (res) {
   res.status(200).json({
     'proxy': 'saved'
   })
 }
-var onFileError = function (res) {
+
+var onSavingError = function (res) {
   res.status(500).json({
     'error': 'not able to save the request'
   })
 }
-var onFileDelete = function (timestamp) {
-  Queue.deleteFile(timestamp)
+
+var onRequestRemove = function (timestamp) {
+  Queue.removeRequest(timestamp)
 }
 
-// Start server
-var server = app.listen(config.server.port, function () {
+function handleError (error) {
+  switch (error.errorCode) {
+    case mdns.kDNSServiceErr_Unknown:
+      console.warn(error)
+      break
+    default:
+      throw error
+  }
+}
+
+var server = app.listen(config.proxy.port, function () {
   EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost)
   EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess)
   EventDispatcher.on(EventDispatcher.PROXY_POST_ERROR, onProxyError)
 
-  EventDispatcher.on(EventDispatcher.FILE_QUEUED, onFileQueued)
-  EventDispatcher.on(EventDispatcher.FILE_ERROR, onFileError)
-  EventDispatcher.on(EventDispatcher.DELETE_FROM_QUEUE, onFileDelete)
+  EventDispatcher.on(EventDispatcher.REQUEST_QUEUED, onRequestQueued)
+  EventDispatcher.on(EventDispatcher.SAVING_ERROR, onSavingError)
+  EventDispatcher.on(EventDispatcher.DELETE_FROM_QUEUE, onRequestRemove)
 
   EventDispatcher.on(EventDispatcher.START_TIMER, onStartTimer)
   EventDispatcher.on(EventDispatcher.CLEAR_TIMER, onClearTimer)
@@ -166,8 +182,15 @@ var server = app.listen(config.server.port, function () {
   console.log('                                ')
   console.log('                                ')
   console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version,
-    ip.address(), port)
+      ip.address(), port)
 
-  // On script launch handle queue
+  try {
+    var ad = mdns.createAdvertisement(mdns.tcp('bifrost'), port)
+    ad.on('error', handleError)
+    ad.start()
+  } catch (ex) {
+    handleError(ex)
+  }
+
   Queue.handle()
 })

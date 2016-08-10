@@ -2,89 +2,90 @@
 
 var config = require('./config/config.json')
 var EventDispatcher = require('./eventDispatcher')
-var fs = require('graceful-fs')
-var fsExtra = require('fs-extra')
+
+var async = require('async')
+var queue = async.queue
+var path = require('path')
+var Datastore = require('nedb')
+var db = new Datastore({filename: path.join(__dirname, config.queue.path, config.queue.name)})
+
+db.loadDatabase()
+
+var requestQueue = queue(function (task, callback) {
+  async.setImmediate(function () {
+    callback()
+  })
+}, 1)
+
+requestQueue.drain = function () {
+  console.log('queue.js: all requests have been processed')
+}
 
 var Queue = function () {
-  var writeFile = function (postData, res) {
+  var saveRequest = function (postData, res) {
     postData.timeStamp = postData.timeStamp || Date.now()
-    fsExtra.ensureDir(config.path.queue, function (err) {
+    db.insert({timestamp: postData.timeStamp, postData: postData}, function (err, newDoc) {
       if (err) {
-         console.log(err);
+        EventDispatcher.emit(EventDispatcher.SAVING_ERROR, res)
       }
-      writeQueuedFile(postData, res)
-    })
-  }
-
-  var writeQueuedFile = function (postData, res) {
-    // Write file in queue
-    fs.writeFile(config.path.queue + '/' + postData.timestamp + '.txt', JSON.stringify(postData), function (err) {
-      if (err) {
-        EventDispatcher.emit(EventDispatcher.FILE_ERROR, res)
-      // throw err
-      }
-
-      if (config.proxy.autostart){
+      if (config.proxy.autostart) {
         EventDispatcher.emit(EventDispatcher.START_TIMER)
       }
-      EventDispatcher.emit(EventDispatcher.FILE_QUEUED, res)
+      EventDispatcher.emit(EventDispatcher.REQUEST_QUEUED, res)
     })
   }
 
   var handle = function () {
     // List files in /app/queue
-    fs.readdir(config.path.queue, function (err, files) {
+    db.find({}, function (err, requests) {
       if (err) {
-        console.log('Queue is currently empty')
+        console.log('queue.js - queue is currently empty')
         return
       }
-
-      // Filter to remove unwanted files
-      files = files.filter(function (a) { return a.match(/\.txt$/) })
-      console.log('Handle Queue - ', files.length)
-
-      if (files.length === 0) {
-        console.log('Clear timer and delete folder')
-        deleteFolder()
-        EventDispatcher.emit(EventDispatcher.CLEAR_TIMER)
+      if (requests.length) {
+        if (config.proxy.autostart) {
+          EventDispatcher.emit(EventDispatcher.START_TIMER)
+        }
       } else {
-        if (config.proxy.autostart) EventDispatcher.emit(EventDispatcher.START_TIMER)
+        console.log('queue.js - clear timer')
+        EventDispatcher.emit(EventDispatcher.CLEAR_TIMER)
       }
-      // Retry post
-      readQueuedFiles(files)
+
+      requests.forEach(function (request) {
+        requestQueue.push(request, function (err) {
+          if (err) {
+            throw err
+          }
+        })
+        EventDispatcher.emit(EventDispatcher.PROXY_POST, request.postData, true)
+      })
     })
   }
 
-  var readQueuedFiles = function (files) {
-    files.forEach(function (file) {
-      // Read file content and send post
-      fs.readFile(config.path.queue + '/' + file, function (err, data) {
-        if (err) throw err
-        try {
-          var dataParsed = JSON.parse(data)
-          EventDispatcher.emit(EventDispatcher.PROXY_POST, dataParsed, true)
-        } catch (err) {
-          console.log(err)
+  var removeRequest = function (timestamp) {
+    db.remove({timestamp: timestamp}, {}, function (err, numRemoved) {
+      if (err) {
+        throw err
+      }
+    })
+  }
+  
+  var totalCount = function () {
+    return new Promise(function (resolve, reject) {
+      db.count({}, function (err, count) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(count)
         }
       })
     })
   }
 
-  var deleteFile = function (timestamp) {
-    fs.unlink(config.path.queue + '/' + timestamp + '.txt', function (err) {
-      if (err) throw err
-    })
-  }
-
-  var deleteFolder = function () {
-    fsExtra.remove(config.path.queue, function (err) {
-      if (err) throw err
-    })
-  }
-
   return {
-    writeFile: writeFile,
-    deleteFile: deleteFile,
+    saveRequest: saveRequest,
+    removeRequest: removeRequest,
+    totalCount: totalCount,
     handle: handle
   }
 }

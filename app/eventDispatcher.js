@@ -10,8 +10,8 @@ var EventDispatcher = function () {
   this.PROXY_POST_SUCCESS = 'PROXY_POST_SUCCESS'
   this.PROXY_POST_ERROR = 'PROXY_POST_ERROR'
 
-  this.FILE_QUEUED = 'FILE_QUEUED'
-  this.FILE_ERROR = 'FILE_ERROR'
+  this.REQUEST_QUEUED = 'REQUEST_QUEUED'
+  this.SAVING_ERROR = 'SAVING_ERROR'
   this.DELETE_FROM_QUEUE = 'DELETE_FROM_QUEUE'
 
   this.START_TIMER = 'START_TIMER'
@@ -19,4 +19,5 @@ var EventDispatcher = function () {
 }
 
 util.inherits(EventDispatcher, EventEmitter)
+
 module.exports = new EventDispatcher()

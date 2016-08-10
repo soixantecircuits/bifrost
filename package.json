@@ -4,8 +4,10 @@
   "description": "A cache gateway for posting in the past",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "test": "newman -c ./test/bifrost.json -n 2000",
+    "start": "node $NODE_DEBUG_OPTION app.js",
+    "test-server": "node $NODE_DEBUG_OPTION ./test/server.js",
+    "tests-requests": "node ./test/requests.js",
+    "tests-proxy": "./node_modules/mocha/bin/mocha ./test/test.js",
     "iso": "standard"
   },
   "repository": {
@@ -21,20 +23,26 @@
   "author": "Soixante circuits",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.0.0",
     "body-parser": "~1.14.1",
     "ejs": "^2.3.4",
     "express": "~4.13.3",
     "fs-extra": "~0.24.0",
     "graceful-fs": "~4.1.2",
     "ip": "~1.0.1",
+    "list.js": "^1.2.0",
     "lodash": "^3.10.1",
+    "mdns": "^2.3.3",
+    "moment": "^2.14.1",
     "multer": "^1.1.0",
     "nanotimer": "0.3.13",
+    "nedb": "^1.8.0",
     "request": "~2.65.0"
   },
   "devDependencies": {
     "minigun": "^1.2.14",
-    "newman": "^1.2.23",
-    "standard": "^3.0.0"
+    "newman": "2.1.2",
+    "standard": "^3.0.0",
+    "supertest": "^2.0.0"
   }
 }

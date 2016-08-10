@@ -1,18 +1,25 @@
 {
-  "server" : {
-    "port" : 3002
+  "server": {
+    "url": "http://remote-server-address",
+    "port": 5656
   },
-  "proxy" : {
-    "url" : "http://xxx/api/post/",
-    "timeout" : "30s",
-    "autostart" : true
+  "proxy": {
+    "url": "http://proxy-server-address",
+    "port": 3002,
+    "timeout": "30s",
+    "bodyparserlimit": "100mb",
+    "autostart": true
   },
   "lookup": ["example"],
-  "path" : {
-    "queue" : "./app/queue"
+  "queue": {
+    "path": "../queue",
+    "name": "requests"
   },
-  "dev" : {
-    "mode" : false,
+  "uploads": {
+    "path": "uploads"
+  },
+  "dev": {
+    "mode": false,
     "url": "http://xxx/api"
   }
 }

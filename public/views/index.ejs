@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--<link rel="shortcut icon" href="/favicon.ico?date=1445360938" />-->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		
+		<title>Bifrost</title>
+
+		<link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" type="text/css" href="../css/style.css">
+	</head>
+	<body>
+		<div class="wrapper">
+			<div>
+				<h1>Welcome to Bifrost,</h1>
+				<p>
+					Number of files queued : <%= lengthQueue %>
+				</p>
+				<a href="#" class="btn btn-action">Force retry queue</a>
+				<a href="#" class="btn btn-action">Clear queue</a>
+			</div>
+			<div id="error-list">
+				<h1>Pending requests: </h1>
+				<% if (pendingQueue.length) { %>
+				<% pendingQueue.length = 200 %> <!--TODO: magic number as temporary solution-->
+				<table>
+					<tbody class="list">
+						<tr>
+							<td class="url">Origin url:</td>
+							<td class="timestamp">Time of posting:</td>
+							<td class="reason">Reason of posting:</td>
+							<td class="status">Status of request:</td>
+						</tr>
+						<% pendingQueue.forEach(function (request) { %>
+							<tr>
+								<td class="url"><%= request.origin %></td>
+								<td class="timestamp"><%= moment(request.timestamp).format('DD/MM/YYYY HH:mm:ss') %></td>
+								<td class="reason"><%= request.reason %></td>
+								<td class="status"><%= request.status %></td>
+							</tr>
+						<% }) %>
+						</tbody>
+				</table>
+				<% } %>
+			</div>
+		</div>
+		
+		<script type="text/javascript" src="../js/main.js"></script>
+	</body>
+</html>
