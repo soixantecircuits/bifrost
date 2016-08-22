@@ -6,7 +6,6 @@ var mdns = require('mdns')
 
 var config = require('../app/config/config.json')
 var collectionJson = require('./bifrost.json', 'utf8')
-
 request = request(config.proxy.url + ':' + config.proxy.port)
 var remoteUrl = config.server.url + ':' + config.server.port + '/'
 

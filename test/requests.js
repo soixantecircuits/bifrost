@@ -3,8 +3,7 @@ var FormData = require('form-data')
 var request = require('request')
 
 var config = require('../app/config/config.json')
-
-
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 console.log('posting application/x-www-form-urlencoded (URL-Encoded Forms) request: ')
 
