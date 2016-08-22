@@ -17,6 +17,15 @@ var upload = multer({
   dest: path.join(__dirname, config.uploads.path)
 })
 
+var fs = require('fs')
+var https = require('https')
+
+var SSLpath = path.join(__dirname, 'cert')
+var privateKey = fs.readFileSync(path.join(SSLpath, 'localhost.key'), 'utf8')
+var certificate = fs.readFileSync(path.join(SSLpath, 'localhost.crt'), 'utf8')
+
+var credentials = {key: privateKey, cert: certificate, passphrase: 'my-passphrase'}
+
 var visualResponse
 var pendingRequests = []
 var timer = new NanoTimer()
@@ -159,7 +168,9 @@ function handleError (error) {
   }
 }
 
-var server = app.listen(config.proxy.port, function () {
+var serverHttps = https.createServer(credentials, app)
+serverHttps.listen(config.proxy.port, function() {
+
   EventDispatcher.on(EventDispatcher.PROXY_POST, onProxyPost)
   EventDispatcher.on(EventDispatcher.PROXY_POST_SUCCESS, onProxySuccess)
   EventDispatcher.on(EventDispatcher.PROXY_POST_ERROR, onProxyError)
@@ -171,7 +182,7 @@ var server = app.listen(config.proxy.port, function () {
   EventDispatcher.on(EventDispatcher.START_TIMER, onStartTimer)
   EventDispatcher.on(EventDispatcher.CLEAR_TIMER, onClearTimer)
 
-  var port = server.address().port
+  var port = serverHttps.address().port
 
   console.log('  ____  _  __               _   ')
   console.log(' |  _ \\(_)/ _|             | |  ')
@@ -181,8 +192,7 @@ var server = app.listen(config.proxy.port, function () {
   console.log(' |____/|_|_| |_|  \\___/|___/\\__|')
   console.log('                                ')
   console.log('                                ')
-  console.log('%s %s is running on http://%s:%s', pjson.name, pjson.version,
-      ip.address(), port)
+  console.log('%s %s is running on https://%s:%s', pjson.name, pjson.version, ip.address(), port)
 
   try {
     var ad = mdns.createAdvertisement(mdns.tcp('bifrost'), port)
